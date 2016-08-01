@@ -223,4 +223,108 @@ We recognise that we have to terminate the program execution hitting `Ctrl+C` (l
 
 ### Print from other threads via the `printqueue`
 
-This requires other threads to have (write) access to `printqueue`
+This requires other threads to have (write) access to `printqueue`!!!
+
+Rust will certainly prevent us from this solution for good reasons:
+```
+. . .
+for num in 0..10 {
+    threads.push(thread::spawn(move || {
+        let l = printqueue.len();
+        println!("Hello from thread number {}, there are {} jobs in the queue.", num, l);
+    }));
+. . .
+```
+We have moved the `printqueue` when we started the first (printer) thread. It is, hence, no longer available for others to read (or write to) it directly.
+
+Instead of moving the whole queue we can just move (multiple copies) of references to one (shared) queue.
+```
+fn main() {
+    let mut threads = Vec::new();
+    let mut printqueue: Vec<&str> = Vec::new();
+    let printqueue_arc = Arc::new(printqueue);
+    printqueue.push("testpage1");
+    printqueue.push("testpage2");
+. . .
+```
+Fine, but the compiler now complains (seven times) about
+```
+use of moved value: `printqueue`
+```
+After having created the reference, the original `printqueue` is no longer available, i.e. for pushing `testpage1..7` to it. We address this as follows:
+* Replace the endless loop for an iteration over all elements in `printqueue`
+* Do this without `pop` so that we do not need a mutable reference
+
+```
+use std::thread;
+use std::sync::Arc;
+use std::time::Duration;
+
+fn main() {
+    let mut threads = Vec::new();
+    let mut printqueue: Vec<&str> = Vec::new();
+
+    printqueue.push("testpage1");
+    printqueue.push("testpage2");
+    printqueue.push("testpage3");
+    printqueue.push("testpage4");
+    printqueue.push("testpage5");
+    printqueue.push("testpage6");
+    printqueue.push("testpage7");
+
+    let printqueue_arc = Arc::new(printqueue);
+    let printqueue_thr = printqueue_arc.clone();
+    threads.push(thread::spawn(move || {
+        for job in printqueue_thr.iter() {
+            // Fiddling around with the timing allowes to see
+            // how the for loop runs in parallel with the other threads started below
+            thread::sleep(Duration::from_millis(1));        
+            println!("print queue: {}", job);
+        }
+    }));
+    for num in 0..7 {
+        let printqueue_thr = printqueue_arc.clone();
+        threads.push(thread::spawn(move || {
+            println!("Hello from thread number {}, I am interested in {}.", num, printqueue_thr[num]);
+        }));
+        println!("Started thread number {:?}.", num);
+    }
+    while let Some(thr) = threads.pop() {
+        let _ = thr.join();
+        println!("Good bye.");
+    }
+}
+```
+
+The output now looks like this:
+```
+Started thread number 0.
+Started thread number 1.
+Hello from thread number 0, I am interested in testpage1.
+print queue: testpage1
+print queue: testpage2
+print queue: testpage3
+Started thread number 2.
+print queue: testpage4
+print queue: testpage5
+print queue: testpage6
+print queue: testpage7
+Hello from thread number 1, I am interested in testpage2.
+Hello from thread number 2, I am interested in testpage3.
+Started thread number 3.
+Started thread number 4.
+Hello from thread number 3, I am interested in testpage4.
+Hello from thread number 4, I am interested in testpage5.
+Started thread number 5.
+Hello from thread number 5, I am interested in testpage6.
+Started thread number 6.
+Hello from thread number 6, I am interested in testpage7.
+Good bye.
+Good bye.
+Good bye.
+Good bye.
+Good bye.
+Good bye.
+Good bye.
+Good bye.
+```
