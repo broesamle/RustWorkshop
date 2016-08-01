@@ -237,6 +237,7 @@ for num in 0..10 {
 ```
 We have moved the `printqueue` when we started the first (printer) thread. It is, hence, no longer available for others to read (or write to) it directly.
 
+#### Concurrent read access
 Instead of moving the whole queue we can just move (multiple copies) of references to one (shared) queue.
 ```
 fn main() {
@@ -328,3 +329,5 @@ Good bye.
 Good bye.
 Good bye.
 ```
+
+#### Concurrent write access
