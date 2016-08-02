@@ -10,6 +10,9 @@ I should mention that this is not (yet) meant as a stand-alone tutorial but as a
 * Shared ressources
 * Locking of shared ressources
 * Variable skopes and implicit unlocking via `MutexGuard` and `drop`
+* Compile time / runtime
+* Static Strings vs. dynamically generated strings
+* Lifetime
 
 Console output from multiple threads
 ------------------------------------
@@ -641,6 +644,8 @@ As we can see, the server takes some time until the print queue is empty. If the
 
 ### Transfer non-trivial information
 
+#### Lifetime, consumption and references
+
 It would be nice if not all print jobs were the same `Some Print Job.`. How to transfer an interesting text to the server to print. It sounds trivial but it isn't:
 
 Our job should look like this: `Printjob number 5 from thread 1`.
@@ -654,3 +659,28 @@ if let Ok(mut guard) = printqueue_thr.lock() {
     (*guard).push("Some Print Job.");
 };
 ```
+Next, we want to push it to the print queue instead of the trivial text `Some Print Job.`:
+
+This `(*guard).push(job);` does not succeed because push wants a reference to a string instead of a string. The reason why it cannot take the string as it is lies in the fact that vectors need things of the same size (which is the case for references but not for strings.
+```
+src/main.rs:39:35: 39:38 error: mismatched types [E0308]
+src/main.rs:39                     (*guard).push(job);
+                                                 ^~~
+src/main.rs:39:35: 39:38 help: run `rustc --explain E0308` to see a detailed explanation
+src/main.rs:39:35: 39:38 note: expected type `&str`
+src/main.rs:39:35: 39:38 note:    found type `std::string::String`
+```
+So we give it a reference to the job `(*guard).push(&job);` which, fortunately, is still not making the compiler happy:
+```
+src/main.rs:39:36: 39:39 error: `job` does not live long enough
+src/main.rs:39                     (*guard).push(&job);
+                                                  ^~~
+src/main.rs:39:36: 39:39 note: reference must be valid for the static lifetime...
+src/main.rs:37:86: 40:18 note: ...but borrowed value is only valid for the block suffix following statement 1 at 37:85
+src/main.rs:37                     let job = format! ("Printjob number {} from thread {}.", i, num);
+
+```
+
+Why could we use the trivial message before but we cannot use the non-trivial one now? The trivial one was already known at compile time so that it _lives long enough_, namely for the whole program execution. We call this _lifetime_ `'static`.
+
+For the non-trivial message, rust cannot be sure and, hence, stops us from carelessly using the reference.  `push`, in turn, is defined so as to _consume_ the reference for good reasons -- it needs the reference to point at something useful, something that _lives as long as the reference_, i.e. presumably longer as the client thread, potentially as long as the print queue.
