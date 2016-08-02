@@ -17,19 +17,27 @@ fn main() {
     let printqueue_shared = Arc::new(Mutex::new(printqueue));
     let printqueue_thr = printqueue_shared.clone();
     threads.push(thread::spawn(move || {
-        let guard = printqueue_thr.lock().unwrap();
-        for job in (*guard).iter() {
-            thread::sleep(Duration::from_millis(1));
-            println!("print queue: {}", job);
+        loop {
+            if let Ok(mut guard) = printqueue_thr.lock() {
+                if let Some (printjob) = (*guard).pop() {
+                    println!("printing: {}", printjob);
+                }
+            }
+            thread::sleep(Duration::from_millis(3));
         }
     }));
     for num in 0..7 {
         let printqueue_thr = printqueue_shared.clone();
         threads.push(thread::spawn(move || {
-            let guard = printqueue_thr.lock().unwrap();
-            println!("Hello from thread number {}, I am interested in {}.", num, (*guard)[num]);
+            if let Ok(guard) = printqueue_thr.lock() {
+                if num < (*guard).len() {
+                    println!("Hello from thread number {}, job {} is there.", num, (*guard)[num]);
+                }
+                else {
+                    println!("Hello from thread number {}, could not retreive job.", num);
+                }
+            };
         }));
-        println!("Started thread number {:?}.", num);
     }
     while let Some(thr) = threads.pop() {
         let _ = thr.join();

@@ -404,3 +404,36 @@ fn main() {
     }
 }
 ```
+For testing that we have actually write access to the queue:
+* Introduce the endless loop for printing jobs of some previous example again.
+* Check for successful locking `if let Ok(guard) =`
+* Have the `guard` mutable
+* Change the queue by actuall `pop`ing  print jobs
+
+```
+loop {
+    if let Ok(mut guard) = printqueue_thr.lock() {
+        if let Some (printjob) = (*guard).pop() {
+            println!("printing: {}", printjob);
+        }
+    }
+    thread::sleep(Duration::from_millis(3));    // Modify this value to achieve timing overlap between threads.
+}
+```
+For the other threads, we also check
+* for successful locking (see above)
+* whether the queue has enough elements so that we can retrieve 'our' job `(*guard)[num]`.
+
+```
+        if let Ok(guard) = printqueue_thr.lock() {
+            if num < (*guard).len() {
+                println!("Hello from thread number {}, job {} is there.", num, (*guard)[num]);
+            }
+            else {
+                println!("Hello from thread number {}, could not retreive job.", num);
+            }
+        };
+```
+The `;` after the `if let` block is easlily overlooked but important!
+
+### Client threads feed jobs to a print server
