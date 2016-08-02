@@ -431,9 +431,12 @@ For the other threads, we also check
             }
             else {
                 println!("Hello from thread number {}, could not retreive job.", num);
-            }
+            } // <<-- lock implicitly released by `guard` going out of scope.
         };
 ```
 The `;` after the `if let` block is easlily overlooked but important!
+
+To conclude, we have a server running in an infinite loop, and printing one job from the queue, if there is any. It is important that the infinit loop locks and (implicitly) releases the queue in every round, when `guard` goes out of scope. Otherwise the 'other threads' had no chance of accessing (locking) the queue.
+
 
 ### Client threads feed jobs to a print server
