@@ -1,5 +1,5 @@
 use std::thread;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 fn main() {
@@ -14,18 +14,20 @@ fn main() {
     printqueue.push("testpage6");
     printqueue.push("testpage7");
 
-    let printqueue_arc = Arc::new(printqueue);
-    let printqueue_thr = printqueue_arc.clone();
+    let printqueue_shared = Arc::new(Mutex::new(printqueue));
+    let printqueue_thr = printqueue_shared.clone();
     threads.push(thread::spawn(move || {
-        for job in printqueue_thr.iter() {
+        let guard = printqueue_thr.lock().unwrap();
+        for job in (*guard).iter() {
             thread::sleep(Duration::from_millis(1));
             println!("print queue: {}", job);
         }
     }));
     for num in 0..7 {
-        let printqueue_thr = printqueue_arc.clone();
+        let printqueue_thr = printqueue_shared.clone();
         threads.push(thread::spawn(move || {
-            println!("Hello from thread number {}, I am interested in {}.", num, printqueue_thr[num]);
+            let guard = printqueue_thr.lock().unwrap();
+            println!("Hello from thread number {}, I am interested in {}.", num, (*guard)[num]);
         }));
         println!("Started thread number {:?}.", num);
     }

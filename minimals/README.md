@@ -237,7 +237,9 @@ for num in 0..10 {
 ```
 We have moved the `printqueue` when we started the first (printer) thread. It is, hence, no longer available for others to read (or write to) it directly.
 
+
 #### Concurrent read access
+
 Instead of moving the whole queue we can just move (multiple copies) of references to one (shared) queue.
 ```
 fn main() {
@@ -331,3 +333,74 @@ Good bye.
 ```
 
 #### Concurrent write access
+
+This is something that, at first sight should not be possible anyway... at least not without careful [locking discipline](http://stackoverflow.com/questions/23350954/why-does-rust-have-mutexes-and-other-sychronization-primitives-if-sharing-of-mu). This is what `Mutex` gives us.
+
+Instead of an `Arc` with the `printqueue` in it directly we are now using an `Arc` with a `Mutex` which in turn 'holds' the `printqueue`.
+
+```
+use std::sync::{Arc, Mutex};
+
+. . .
+
+    let printqueue_shared = Arc::new(Mutex::new(printqueue));
+    let printqueue_thr = printqueue_shared.clone();
+```
+Please note the renamed variable `printqueue_shared`.
+
+When using the queue we need:
+* `let guard = printqueue_thr.lock().unwrap();`
+* `*guard` instead of `printqueue_thr`
+
+```
+threads.push(thread::spawn(move || {
+    let guard = printqueue_thr.lock().unwrap();
+    for job in (*guard).iter() {
+        thread::sleep(Duration::from_millis(1));
+```
+. . . and similarly
+```
+let guard = printqueue_thr.lock().unwrap();
+println!("Hello from thread number {}, I am interested in {}.", num, (*guard)[num]);
+```
+
+
+The overall program after introducing Mutex:
+```
+use std::thread;
+use std::sync::Arc;
+use std::time::Duration;
+
+fn main() {
+    let mut threads = Vec::new();
+    let mut printqueue: Vec<&str> = Vec::new();
+
+    printqueue.push("testpage1");
+    printqueue.push("testpage2");
+    printqueue.push("testpage3");
+    printqueue.push("testpage4");
+    printqueue.push("testpage5");
+    printqueue.push("testpage6");
+    printqueue.push("testpage7");
+
+    let printqueue_arc = Arc::new(printqueue);
+    let printqueue_thr = printqueue_arc.clone();
+    threads.push(thread::spawn(move || {
+        for job in printqueue_thr.iter() {
+            thread::sleep(Duration::from_millis(1));
+            println!("print queue: {}", job);
+        }
+    }));
+    for num in 0..7 {
+        let printqueue_thr = printqueue_arc.clone();
+        threads.push(thread::spawn(move || {
+            println!("Hello from thread number {}, I am interested in {}.", num, printqueue_thr[num]);
+        }));
+        println!("Started thread number {:?}.", num);
+    }
+    while let Some(thr) = threads.pop() {
+        let _ = thr.join();
+        println!("Good bye.");
+    }
+}
+```
