@@ -684,3 +684,9 @@ src/main.rs:37                     let job = format! ("Printjob number {} from t
 Why could we use the trivial message before but we cannot use the non-trivial one now? The trivial one was already known at compile time so that it _lives long enough_, namely for the whole program execution. We call this _lifetime_ `'static`.
 
 For the non-trivial message, rust cannot be sure and, hence, stops us from carelessly using the reference.  `push`, in turn, is defined so as to _consume_ the reference for good reasons -- it needs the reference to point at something useful, something that _lives as long as the reference_, i.e. presumably longer as the client thread, potentially as long as the print queue.
+
+Finally, we can use `String` instead of `&str` which is not bound to the _lifetime_ or _stackframe_ of the child thread:
+* Define the printqueue as `let printqueue: Vec<String> = Vec::new();`.
+* Push `String` rather than `&str` into the queue:
+    `printqueue.push(String::from("testpage1");`
+* Correspondingly, `job` receives a `String` from format so that `(*guard).push(job);` just works.
