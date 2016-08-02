@@ -637,3 +637,20 @@ printing: Some Print Job.
 ```
 
 As we can see, the server takes some time until the print queue is empty. If the loop of the server was 'too slow' the print queue would tend to grow 'infinitely'.
+
+
+### Transfer non-trivial information
+
+It would be nice if not all print jobs were the same `Some Print Job.`. How to transfer an interesting text to the server to print. It sounds trivial but it isn't:
+
+Our job should look like this: `Printjob number 5 from thread 1`.
+
+First modification lets the clients create an according text and -- for now -- output it by themselves via `println!`:
+```
+if let Ok(mut guard) = printqueue_thr.lock() {
+    i += 1;
+    let job = format! ("Printjob number {} from thread {}.", i, num);
+    println!("I will put a job in the queue: {}", job);
+    (*guard).push("Some Print Job.");
+};
+```

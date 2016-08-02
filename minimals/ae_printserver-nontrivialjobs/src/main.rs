@@ -34,7 +34,8 @@ fn main() {
             loop {
                 if let Ok(mut guard) = printqueue_thr.lock() {
                     i += 1;
-                    println!("Hello from thread number {}, I will put job number {}.", num, i);
+                    let job = format! ("Printjob number {} from thread {}.", i, num);
+                    println!("I will put a job in the queue: {}", job);
                     (*guard).push("Some Print Job.");
                 };
                 thread::sleep(Duration::from_millis(100*(num+1)));
