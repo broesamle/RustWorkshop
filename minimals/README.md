@@ -440,3 +440,192 @@ To conclude, we have a server running in an infinite loop, and printing one job 
 
 
 ### Client threads feed jobs to a print server
+
+In order to implement and demonstrate a client-server scheme we modify the 'other threads' so that each of them also
+* runs in an infinite `loop`.
+* from time to time `push` ing a `job` in the `queue` `(*guard).push("Some Print Job.");`.
+
+For monitoring the dynamics between threads we
+* have a look at the queue whenever the server enters the loop: `println! ("The Queue: {:?}", (*guard));`.
+* adapt the sleep duration in the server and client loop so that things don't run too fast to observe.
+* add a counter variable in each client thread `let mut i = 0;` increase it on every new job `i += 1` and print a message for every new job.
+* delay the print clients differently so that they put their jobs in different intervals.
+
+The overall program:
+```
+use std::thread;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
+fn main() {
+    let mut threads = Vec::new();
+    let mut printqueue: Vec<&str> = Vec::new();
+
+    printqueue.push("testpage1");
+    printqueue.push("testpage2");
+    printqueue.push("testpage3");
+    printqueue.push("testpage4");
+    printqueue.push("testpage5");
+    printqueue.push("testpage6");
+    printqueue.push("testpage7");
+
+    let printqueue_shared = Arc::new(Mutex::new(printqueue));
+    let printqueue_thr = printqueue_shared.clone();
+    threads.push(thread::spawn(move || {
+        loop {
+            if let Ok(mut guard) = printqueue_thr.lock() {
+                println! ("The Queue: {:?}", (*guard));
+                if let Some (printjob) = (*guard).pop() {
+                    println!("printing: {}", printjob);
+                }
+            }
+            thread::sleep(Duration::from_millis(30));
+        }
+    }));
+    for num in 0..7 {
+        let printqueue_thr = printqueue_shared.clone();
+        threads.push(thread::spawn(move || {
+            let mut i = 0;
+            loop {
+                if let Ok(mut guard) = printqueue_thr.lock() {
+                    i += 1;
+                    println!("Hello from thread number {}, I will put job number {}.", num, i);
+                    (*guard).push("Some Print Job.");
+                };
+                thread::sleep(Duration::from_millis(100*(num+1)));
+            }
+        }));
+    }
+    while let Some(thr) = threads.pop() {
+        let _ = thr.join();
+    }
+}
+```
+This is the console output of a typical run:
+```
+Hello from thread number 0, I will put job number 1.
+Hello from thread number 2, I will put job number 1.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 3, I will put job number 1.
+Hello from thread number 1, I will put job number 1.
+Hello from thread number 4, I will put job number 1.
+Hello from thread number 6, I will put job number 1.
+Hello from thread number 5, I will put job number 1.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 0, I will put job number 2.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 0, I will put job number 3.
+Hello from thread number 1, I will put job number 2.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 2, I will put job number 2.
+Hello from thread number 0, I will put job number 4.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+printing: testpage7
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"]
+printing: testpage6
+Hello from thread number 0, I will put job number 5.
+Hello from thread number 3, I will put job number 2.
+Hello from thread number 1, I will put job number 3.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 0, I will put job number 6.
+Hello from thread number 4, I will put job number 2.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5"]
+printing: testpage5
+Hello from thread number 2, I will put job number 3.
+Hello from thread number 0, I will put job number 7.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 1, I will put job number 4.
+Hello from thread number 5, I will put job number 2.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 0, I will put job number 8.
+Hello from thread number 6, I will put job number 2.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "testpage4"]
+printing: testpage4
+Hello from thread number 0, I will put job number 9.
+Hello from thread number 3, I will put job number 3.
+Hello from thread number 1, I will put job number 5.
+The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 2, I will put job number 4.
+Hello from thread number 0, I will put job number 10.
+The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "testpage2", "testpage3"]
+printing: testpage3
+The Queue: ["testpage1", "testpage2"]
+printing: testpage2
+Hello from thread number 0, I will put job number 11.
+Hello from thread number 1, I will put job number 6.
+Hello from thread number 4, I will put job number 3.
+The Queue: ["testpage1", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 0, I will put job number 12.
+The Queue: ["testpage1", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["testpage1"]
+printing: testpage1
+The Queue: []
+Hello from thread number 2, I will put job number 5.
+Hello from thread number 0, I will put job number 13.
+Hello from thread number 3, I will put job number 4.
+Hello from thread number 1, I will put job number 7.
+The Queue: ["Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+Hello from thread number 5, I will put job number 3.
+The Queue: ["Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+The Queue: ["Some Print Job.", "Some Print Job.", "Some Print Job."]
+printing: Some Print Job.
+^C
+```
+
+As we can see, the server takes some time until the print queue is empty. If the loop of the server was 'too slow' the print queue would tend to grow 'infinitely'.

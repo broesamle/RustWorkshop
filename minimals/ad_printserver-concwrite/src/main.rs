@@ -19,24 +19,26 @@ fn main() {
     threads.push(thread::spawn(move || {
         loop {
             if let Ok(mut guard) = printqueue_thr.lock() {
+                println! ("The Queue: {:?}", (*guard));
                 if let Some (printjob) = (*guard).pop() {
                     println!("printing: {}", printjob);
                 }
             }
-            thread::sleep(Duration::from_millis(3));
+            thread::sleep(Duration::from_millis(30));
         }
     }));
     for num in 0..7 {
         let printqueue_thr = printqueue_shared.clone();
         threads.push(thread::spawn(move || {
-            if let Ok(guard) = printqueue_thr.lock() {
-                if num < (*guard).len() {
-                    println!("Hello from thread number {}, job {} is there.", num, (*guard)[num]);
-                }
-                else {
-                    println!("Hello from thread number {}, could not retreive job.", num);
-                }
-            };
+            let mut i = 0;
+            loop {
+                if let Ok(mut guard) = printqueue_thr.lock() {
+                    i += 1;
+                    println!("Hello from thread number {}, I will put job number {}.", num, i);
+                    (*guard).push("Some Print Job.");
+                };
+                thread::sleep(Duration::from_millis(100*(num+1)));
+            }
         }));
     }
     while let Some(thr) = threads.pop() {
