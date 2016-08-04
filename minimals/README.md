@@ -1,10 +1,12 @@
+
+
 Minimal Instructives
 ====================
+
 A collection of small instructive examples demonstrating issues related to
 multithreadding in rust.
 
 I should mention that this is not (yet) meant as a stand-alone tutorial but as a collection of small examples touching on key concepts a rust learner will encounter. The first example, despite the fact of being not even 50 lines of rust code, introduces
-
 * Multiple threads running concurrently
 * Have the main thread `join` its child threads in order to keep central ressources (here `stdout`) available for the child threads
 * Shared ressources
@@ -13,6 +15,7 @@ I should mention that this is not (yet) meant as a stand-alone tutorial but as a
 * Compile time / runtime
 * Static Strings vs. dynamically generated strings
 * Lifetime
+
 
 Console output from multiple threads
 ------------------------------------
@@ -30,6 +33,7 @@ fn main() {
 ```
 
 We get a different output on every run:
+
 ```
 [~/projets/RustWorkshop/minimals/aa_multiprint]$ cargo run
     Finished debug [unoptimized + debuginfo] target(s) in 0.1 secs
@@ -75,6 +79,7 @@ Thread 6
 ```
 
 Occasionally we get:
+
 ```
 thread '<unnamed>' panicked at 'cannot access stdout during shutdown', src/libcore/option.rs:700
 note: Run with `RUST_BACKTRACE=1` for a backtrace.
@@ -82,7 +87,6 @@ note: Run with `RUST_BACKTRACE=1` for a backtrace.
 indicating that the standard output was already 'broken' while the child process still wanted to use it.
 
 To understand more of what is going on, we collect the result of the spawning in a vector and we do more verbose output:
-
 ```
 use std::thread;
 
@@ -100,7 +104,9 @@ fn main() {
 }
 
 ```
-Despite the fact that occasionally messages are missing from the output (here `Hello from thread number 9`) all threads are correctly started and there is always 10 elements in `vec`.
+
+Despite the fact that occasionally messages are missing from the output (here `Hello from thread number 9`) all threads are correctly started, there is always 10 elements in `vec` as we always see 10 `Good bye`s.
+
 ```
 Started thread number 0.
 Started thread number 1.
@@ -150,9 +156,11 @@ cf. [threads at rustbyexample](http://rustbyexample.com/std_misc/threads.html)
 Minimal 'print server'
 ----------------------
 
+
 ### A non-terminating thread looking for print jobs
 
 The following example introduces one thread which `loop`s infinitely, looking for 'print jobs' (strings) in the `printqueue`.
+
 ```
 use std::thread;
 
@@ -186,6 +194,7 @@ fn main() {
     }
 }
 ```
+
 This is a typical output:
 
 ```
@@ -229,14 +238,16 @@ Good bye.
 ^C
 [~/projets/RustWorkshop/minimals/ac_printserve]$
 ```
-We recognise that we have to terminate the program execution hitting `Ctrl+C` (last two lines).
+
+We recognise that we have to terminate the program execution hitting `Ctrl+C`.
 
 
 ### Print from other threads via the `printqueue`
 
-This requires other threads to have (write) access to `printqueue`!!!
+This requires other threads to have access to `printqueue`!!!
 
-Rust will certainly prevent us from this solution for good reasons:
+Rust will certainly prevent us from this naive solution, for good reasons:
+
 ```
 . . .
 for num in 0..10 {
@@ -246,12 +257,15 @@ for num in 0..10 {
     }));
 . . .
 ```
-We have moved the `printqueue` when we started the first (printer) thread. It is, hence, no longer available for others to read (or write to) it directly.
+
+We have moved the `printqueue` when we started the first (printer) thread. Hence, It is no longer available for others to read (or write to) it directly.
 
 
 #### Concurrent read access
 
+Before thinking about concurrent write (mutable) access to the queue I would like to focus for any form of shared access across threads to the same ressource. Reading is always easier because no changes can happen while reading data. [TODO: Link+hint to rusts rules of (im)mutable references borrowing](xxxxxxxxxx)
 Instead of moving the whole queue we can just move (multiple copies) of references to one (shared) queue.
+
 ```
 fn main() {
     let mut threads = Vec::new();
@@ -261,13 +275,18 @@ fn main() {
     printqueue.push("testpage2");
 . . .
 ```
+
 Fine, but the compiler now complains (seven times) about
 ```
 use of moved value: `printqueue`
+
 ```
-After having created the reference, the original `printqueue` is no longer available, i.e. for pushing `testpage1..7` to it. We address this as follows:
+
+After having created the reference, the original `printqueue` is no longer available, i.e. for pushing `testpage1..7` to it.
+
+We address this as follows:
 * Replace the endless loop for an iteration over all elements in `printqueue`
-* Do this without `pop` so that we do not need a mutable reference
+* Do this without `pop` so that we do not need a mutable reference.
 
 ```
 use std::thread;
@@ -311,6 +330,7 @@ fn main() {
 ```
 
 The output now looks like this:
+
 ```
 Started thread number 0.
 Started thread number 1.
@@ -343,6 +363,7 @@ Good bye.
 Good bye.
 ```
 
+
 #### Concurrent write access
 
 This is something that, at first sight should not be possible anyway... at least not without careful [locking discipline](http://stackoverflow.com/questions/23350954/why-does-rust-have-mutexes-and-other-sychronization-primitives-if-sharing-of-mu). This is what `Mutex` gives us.
@@ -357,6 +378,7 @@ use std::sync::{Arc, Mutex};
     let printqueue_shared = Arc::new(Mutex::new(printqueue));
     let printqueue_thr = printqueue_shared.clone();
 ```
+
 Please note the renamed variable `printqueue_shared`.
 
 When using the queue we need:
@@ -415,6 +437,7 @@ fn main() {
     }
 }
 ```
+
 For testing that we have actually write access to the queue:
 * Introduce the endless loop for printing jobs of some previous example again.
 * Check for successful locking `if let Ok(guard) =`
@@ -431,6 +454,7 @@ loop {
     thread::sleep(Duration::from_millis(3));    // Modify this value to achieve timing overlap between threads.
 }
 ```
+
 For the other threads, we also check
 * for successful locking (see above)
 * whether the queue has enough elements so that we can retrieve 'our' job `(*guard)[num]`.
@@ -445,6 +469,7 @@ For the other threads, we also check
             } // <<-- lock implicitly released by `guard` going out of scope.
         };
 ```
+
 The `;` after the `if let` block is easlily overlooked but important!
 
 To conclude, we have a server running in an infinite loop, and printing one job from the queue, if there is any. It is important that the infinit loop locks and (implicitly) releases the queue in every round, when `guard` goes out of scope. Otherwise the 'other threads' had no chance of accessing (locking) the queue.
@@ -463,6 +488,7 @@ For monitoring the dynamics between threads we
 * delay the print clients differently so that they put their jobs in different intervals.
 
 The overall program:
+
 ```
 use std::thread;
 use std::sync::{Arc, Mutex};
@@ -644,6 +670,7 @@ As we can see, the server takes some time until the print queue is empty. If the
 
 ### Transfer non-trivial information
 
+
 #### Lifetime, consumption and references
 
 It would be nice if not all print jobs were the same `Some Print Job.`. How to transfer an interesting text to the server to print. It sounds trivial but it isn't:
@@ -651,6 +678,7 @@ It would be nice if not all print jobs were the same `Some Print Job.`. How to t
 Our job should look like this: `Printjob number 5 from thread 1`.
 
 First modification lets the clients create an according text and -- for now -- output it by themselves via `println!`:
+
 ```
 if let Ok(mut guard) = printqueue_thr.lock() {
     i += 1;
@@ -659,9 +687,11 @@ if let Ok(mut guard) = printqueue_thr.lock() {
     (*guard).push("Some Print Job.");
 };
 ```
+
 Next, we want to push it to the print queue instead of the trivial text `Some Print Job.`:
 
 This `(*guard).push(job);` does not succeed because push wants a reference to a string instead of a string. The reason why it cannot take the string as it is lies in the fact that vectors need things of the same size (which is the case for references but not for strings.
+
 ```
 src/main.rs:39:35: 39:38 error: mismatched types [E0308]
 src/main.rs:39                     (*guard).push(job);
@@ -678,7 +708,6 @@ src/main.rs:39                     (*guard).push(&job);
 src/main.rs:39:36: 39:39 note: reference must be valid for the static lifetime...
 src/main.rs:37:86: 40:18 note: ...but borrowed value is only valid for the block suffix following statement 1 at 37:85
 src/main.rs:37                     let job = format! ("Printjob number {} from thread {}.", i, num);
-
 ```
 
 Why could we use the trivial message before but we cannot use the non-trivial one now? The trivial one was already known at compile time so that it _lives long enough_, namely for the whole program execution. We call this _lifetime_ `'static`.
