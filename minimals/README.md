@@ -15,20 +15,22 @@ Graphics in a Window
 * Library
 * Standard Library
 
-### New Project
+### Step1: New Project
 
 Make a new project by typing `cargo new --bin graphout` in the console. Instead of `graphout` you can choose whatever name you like.
 
 The following snapshot shows you what cargo will create for you in a subdirectory named `graphout`.
 
 
-#### [Snapshot]
+#### [Snapshot] Step 1
 [download files](https://github.com/broesamle/RustWorkshop/releases/tag/graphout01_new-project)
 |
 [see changes](https://github.com/broesamle/RustWorkshop/commit/c7dd93813e05d4142ad64fa903013cfa22331f30)
 
+#### [Testing] Step 1
+TODO
 
-### Access the Windowmanagement and Graphics Library
+### Step2: Access the Windowmanagement (and Graphics Output)
 
 The _operating system_ offers functionality for opening a window. In order to use this, we need to `use` a number of _libraries_
 
@@ -76,7 +78,7 @@ fn main() {
 }
 ```
 
-#### [Snapshot]
+#### [Snapshot] Step 2
 [download files](https://github.com/broesamle/RustWorkshop/releases/tag/graphout02_open-window)
 |
 [see changes](https://github.com/broesamle/RustWorkshop/commit/3495e498198651826cb58e27c0fcdeb7d9f15064)
