@@ -1,6 +1,0 @@
-[package]
-name = "ac_printserver"
-version = "0.1.0"
-authors = ["Martin Broesamle <m@m-broe.de>"]
-
-[dependencies]

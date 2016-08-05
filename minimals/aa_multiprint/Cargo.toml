@@ -1,6 +1,0 @@
-[package]
-name = "aa_multiprint"
-version = "0.1.0"
-authors = ["Martin Broesamle <m@m-broe.de>"]
-
-[dependencies]
