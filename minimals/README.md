@@ -82,3 +82,28 @@ fn main() {
 [download files](https://github.com/broesamle/RustWorkshop/releases/tag/graphout02_open-window)
 |
 [see changes](https://github.com/broesamle/RustWorkshop/commit/3495e498198651826cb58e27c0fcdeb7d9f15064)
+
+#### [Testing] Step 2
+
+`cargo build` should output something like
+
+```
+Compiling graphout v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/graphout)
+src/main.rs:8:9: 8:15 warning: unused variable: `window`, #[warn(unused_variables)] on by default
+src/main.rs:8     let window: Window =
+                   ^~~~~~
+ Finished debug [unoptimized + debuginfo] target(s) in 1.50 secs
+```
+
+Don't worry about the `unused variable` warning for now.
+
+Running the program `cargo run` gives the console output
+
+```
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/graphout`
+```
+
+Otherwise not much is happening. The careful observer (using a not too fast machine) may recognise a quick flash of a window or icon in the application louncher bar. So there is some interaction going on between our program and the operating system.
+
+Despite not useful in itself, having those two components 'talk to each other' at all is a good result for now.
