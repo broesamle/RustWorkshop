@@ -8,4 +8,6 @@ fn main() {
     let window: Window =
         WindowSettings::new("Hello World!", [512; 2])
             .build().unwrap();
+
+    loop { }
 }
