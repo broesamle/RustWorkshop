@@ -107,3 +107,33 @@ Running the program `cargo run` gives the console output
 Otherwise not much is happening. The careful observer (using a not too fast machine) may recognise a quick flash of a window or icon in the application louncher bar. So there is some interaction going on between our program and the operating system.
 
 Despite not useful in itself, having those two components 'talk to each other' at all is a good result for now.
+
+
+### Step 3: Infinite loop
+
+The window 'just flashes' because our application quits immediately after lounching it. It follows the Scheme
+* start
+* run (from first to last instruction)
+* terminate.
+
+What we want is something like
+* start
+* run
+* terminate, when the user 'closes the application'.
+
+That is, the application reacts to event(s) which are generated outside the application: The user closes the window, presses `escape`, etc. First progress  towards reacting to events would be not to terminate (at all).
+
+After creating the window we just loop infinitely (just add this line before the final `}`:
+
+```
+loop { }
+```
+
+#### [Snapshot] Step 3a
+[download files](https://github.com/broesamle/RustWorkshop/releases/tag/graphout03a_infinite-loop)
+|
+[see changes](https://github.com/broesamle/RustWorkshop/commit/5cc87606651ac43ad0aeb7c00e30ed48fba96be7)
+
+#### [Testing] Step 3a
+
+Well, it does the job, the window remains visible, containing weird mixture of background and titlebar... Well, after all, we have created and 'registered' a window at the window management system of the _operating system_ but our application does not care about anything. It just loops infinitely. 
