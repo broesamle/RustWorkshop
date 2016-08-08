@@ -56,16 +56,26 @@ Programming means to transform the knowledge of person into a sequence of instru
 
 How much did we have of apples, peanuts, fingers,  . . ?
 
-<img src="../images/fingers+peanuts+paper.jpg" width = 30%/>
+<img src="../images/fingers+peanuts+paper.jpg" width="30%" />
 
 Today's computers have a memory that is organised in cells with addresses. Technically, there is no such thing as names for rows in a table as in the picture above. Just memory _cells_ with _addresses_. You can think of it as numbered locations of equal size.
 
-<img src="../images/memorycellsA.jpg" width = 30%/>
+<img src="../images/memorycellsA.jpg" width ="30%" />
 
 For the machine there is only addresses, numbers of cells, in consecutive order. In each cell, there is a value. There is no such thin as an empty cell. There is always a number in each cell so we must be careful, which cells to use.
 
 > Ok, `fingers` at address 5, `apples` at address 7, `peanuts` at address 6, . . .
 
-To make it easier (for humans) to keep track of which value is kept at what address, we use variables.
+To make it easier (for humans) to keep track of which value is kept at what address, we use variables. At first it looks more complicated:
+
+<img src="../images/variables_names+addressesA.jpg" width="60%" />
+
+As a human, you can relax and focus on two parts only: variables' names and their values.
+
+<img src="../images/variables_names+addressesB.jpg" width="60%" />
+
+
 
 ### Variables in Rust
+
+As I mentioned above, programming languages were designed to mediate between the technical complexities and the way humans prefer to think. Variables are the first feature we will learn in this respect.
