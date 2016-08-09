@@ -89,10 +89,6 @@ fn main() {
 }
 ```
 
-=======
-
-
-
 ### Step 3: Your first lines of source code
 
 In the former step you have seen the _listing_ of the source code (in file `main.rs`). In order to make changes to the source code you need to use a _text editor_. This is different to a word processor. It edits only the characters but does not allow to introduce any formatting, like **bold** or _italics_ and the like.
@@ -366,3 +362,6 @@ fn count_one_up(hand) {
 ```
 
 #### Step 7c: Use your operations
+
+
+[NEXT: Graphics Output](graphout.md)
