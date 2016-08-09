@@ -1,9 +1,11 @@
+**IMPORTANT: ** Do not work on the content in this file directly. Work on the respective branches and then merge into master, creating this compilation of all examples.
+
+This is work in progress!! Most of the sections are still missing !!!
 
 
 Minimal Instructives
 ====================
 
-This is work in progress!! Most of the sections are still missing !!!
 
 A collection of small but dense examples will dare the learner to get in touch with the complexities of systems programming in rust.
 
@@ -82,7 +84,7 @@ As a human, you can relax and focus on two parts only: variables' names and thei
 
 
 
-### Variables in Rust
+#### Variables in Rust
 
 As I mentioned above, programming languages were designed to mediate between the technical complexities and the way humans prefer to think. Variables are the first feature we will learn in this respect.
 
@@ -93,7 +95,71 @@ let fingers = 3;
 let peanuts = 2;
 ```
 
-The follogwing _Counting Hands_ project will guide you into rust so that you can try it yourself.
+The _Counting Hands_ project in the next larger section will guide you into rust so that you can try it yourself.
+
+
+### Operations
+
+
+Memory stores the data we want to process. Operations are the steps that actually process the data.
+
+**Count one up:**
+
+<img src="../images/fingers-1_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+<img src="../images/fingers-2_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-3_smaller.jpg" width="15%"/>
+
+**Count one down:**
+
+<img src="../images/fingers-3_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+<img src="../images/fingers-2_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-1_smaller.jpg" width="15%"/>
+
+If you combine them carefully you can do proper calculations:
+
+**Add hands:**
+
+Yes, I should say add the value of one hand to the value in another.
+
+<img src="../images/fingers-1_smaller.jpg" width="15%"/>
++
+<img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+How do we do it? Here is a simple _program_ for adding two numbers with hands and fingers:
+
+As long as we see a finger in the right hand we:
+* `count one down` on the right hand and
+* `count one up` on the left hand
+
+And this is how it executes for 1 + 2:
+
+1. **Left:** <img src="../images/fingers-1_smaller.jpg" width="15%"/>  **Right:** <img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+2. **Left:** <img src="../images/fingers-2_smaller.jpg" width="15%"/>  **Right:** <img src="../images/fingers-1_smaller.jpg" width="15%"/>
+
+3. **Left:** <img src="../images/fingers-3_smaller.jpg" width="15%"/>  **Right:** Yes, I should have taken a picture of a hand showing zero fingers.
+
+4. You are getting the point. Now that the right hand does not show any fingers we do not continue and in the right hand have our
+**Result!!**
+
+#### Operations in Rust
+In rust, you would express this as follows
+
+```
+let mut left_hand = 1;
+let mut right_hand = 2;
+
+while right_hand > 0 {
+    left_hand = count_one_up(left_hand);
+    right_hand = count_one_down(right_hand);
+}
+```
+
+At this point, we can not yet test this example in rust. But we will come back to it after finishing some essential preparations.
 
 
 First Project: Counting Hands
@@ -162,32 +228,308 @@ Whenever a useful intermediate state is achieved, a _snapshot_ will offer the pr
 |
 [see changes](https://github.com/broesamle/RustWorkshop/commit/f46e703d85ea21bf90d1d59c58fa511d5daa7ee8)
 
+
 ### Step 2: Where is 'the program'?
+
 Now that we have already used the `cargo` _build system_ for to create your first app the next obvious question is: Where is 'the program'. There is three important components involved:
 * The _source code_ is what humans can read and write. Here, this is written in _Rust_.
 * The _build system_ translates the source code into something that . . .
 * . . . your operating system can start as an _application_ or _executable_.
 
-The sources are located in the subdirectory `src` in your project folder. Lets have a look: `cd src` and ls should show you that the file `main.rs` is there.
+The sources are located in the subdirectory `src` in your project folder. Lets have a look: `ls src/` should show you that the file `main.rs` is there.
 
 ```
-[~/projets/RustWorkshop/minimals/countinghands]$ cd src
-[~/projets/RustWorkshop/minimals/countinghands/src]$ ls
+[~/projets/RustWorkshop/minimals/countinghands/src]$ ls src/
 main.rs
 [~/projets/RustWorkshop/minimals/countinghands/src]
 ```
 
-`cat main.rs` finally shows you 'the program', the source of the program, to be precise:
+`cat src/main.rs` finally shows you 'the program', the source of the program, to be precise:
 ```
 fn main() {
     println!("Hello, world!");
 }
 ```
 
-----
-** ! ! ! TO BE CONTINUED ! ! !  **
+=======
+
+
+
+### Step 3: Your first lines of source code
+
+In the former step you have seen the _listing_ of the source code (in file `main.rs`). In order to make changes to the source code you need to use a _text editor_. This is different to a word processor. It edits only the characters but does not allow to introduce any formatting, like **bold** or _italics_ and the like.
+
+Open `main.rs` in your favourite text editor which you should have installed on your system before.
+
+TODO: Link to the tut for setting up the machine tutorial
+
+If you are unsure what to use you can -- for now -- try some of the following commands:
+
+
+```
+geany src/main.rs &
+
+atom src/main.rs &
+
+gedit src/main.rs &
+
+kate src/main.rs &
+
+nano src/main.rs &
+
+pico src/main.rs &
+
+. . .
+```
+According to the primary addressees of this comment I have chosen those candidates which loosely resemble the behaviour of a word processor.
+
+> I should remark, though, that the question _What editor to use_ is among the topics discussed most emotionally in the community ;-)
 
 ----
+
+#### &#9736; Pitfall
+
+If you see your code nicely arranged on a _page_:
+
+<img src="../images/wordprocessor-screenshot1.jpg" width="60%" />
+
+And you can change the format of some part of the overall code like this
+
+<img src="../images/wordprocessor-screenshot2.jpg" width="60%" />
+
+then it is not a text editor but a word processor. If you save the file from there it will put all sorts of things in it but it will no longer be something the _rust built system_ would understand.
+
+#### &#9728; Pitfall avoided!
+
+----
+
+If all goes well you should see the source code as an opened document in some editor. Nowadays editors often increase legibility by colouring different parts of the code differently; further evidence that you picked a programmers tool rather than an office document solution.
+
+Returning to the section on variables you will find the three lines of rust code, each line for one variable:
+```
+let apples = 8;
+let fingers = 3;
+let peanuts = 2;
+```
+Insert them into the open file after the first line, which should then look something like this:
+
+<img src="../images/editor-screenshot2.jpg" width="60%" />
+
+Save the file to disk (keeping the original name).
+
+#### [Testing] Step 3
+
+If you return to the console using `cat` again,  you can check if the saving was successful:
+
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cat src/main.rs
+fn main() {
+    let apples = 8;
+    let fingers = 3;
+    let peanuts = 2;
+    println!("Hello, world!");
+}
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+
+You should see the three inserted lines in the listing. Now you know they are in the (updated) source file let's give it a try and see what the rust build system says: `cargo build`
+
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+src/main.rs:2:9: 2:15 warning: unused variable: `apples`, #[warn(unused_variables)] on by default
+src/main.rs:2     let apples = 8;
+                      ^~~~~~
+src/main.rs:3:9: 3:16 warning: unused variable: `fingers`, #[warn(unused_variables)] on by default
+src/main.rs:3     let fingers = 3;
+                      ^~~~~~~
+src/main.rs:4:9: 4:16 warning: unused variable: `peanuts`, #[warn(unused_variables)] on by default
+src/main.rs:4     let peanuts = 2;
+                      ^~~~~~~
+```
+
+Whow, that looks complicated ... as a professional, we quickly scan whether it is _errors_ or 'just' _warnigs_. We are happy because we only got warnings. (Don't be too lazy by ignoring them completely; they are a useful thing in most of the cases.)
+
+What do they say? This is the line to look at first:
+```
+src/main.rs:2:9: 2:15 warning: unused variable: `apples`
+```
+* `unused variable` tells us that we created a variable whithout making use of it (this will be the next step!) in this case the warning apears three times, once for each variable `apples`, `fingers`, `peanuts`.
+
+* `src/main.rs:2:9: 2:15` tells us the source file `src/main.rs`: the code line `2`: the column `9` where the 'problematic' bit starts; similarly where it ends.
+
+* fortunately the added lines visualise the location again:
+```
+src/main.rs:2     let apples = 8;
+                      ^~~~~~
+```
+
+`cargo run` will not make much difference (we were already warned about the useless-ness of these three lines of code.
+```
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/countinghands`
+Hello, world!
+```
+
+### Step 4: Print the values of the variables
+
+Just insert these two lines right after `println!("Hello, world!");`:
+
+```
+println!("There are {} apples, we see {} fingers and how many peanuts? {}, exactly.",
+    apples, fingers, peanuts);
+```
+
+#### [Snapshot] Step 4
+[inspect the source](https://github.com/broesamle/RustWorkshop/blob/76b438d255e60800c108a129fd646ebada7e2222/minimals/countinghands/src/main.rs)
+|
+[see changes](https://github.com/broesamle/RustWorkshop/commit/76b438d255e60800c108a129fd646ebada7e2222)
+|
+[raw source **main.rs**](https://github.com/broesamle/RustWorkshop/raw/76b438d255e60800c108a129fd646ebada7e2222/minimals/countinghands/src/main.rs)
+
+
+#### [Testing] Step 4
+You have to save the file and build the project, just as before.
+Nice, the warnings about the unused variables are gone!
+
+Now, run the project.
+
+Your console should now look like this:
+
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+   Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.37 secs
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/countinghands`
+Hello, world!
+There are 8 apples, we see 3 fingers and how many peanuts? 2, exactly.
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+
+#### [Explanation] Step 4
+
+TODO insert explanation for formatted output!
+
+
+### Step 5: Change the values of variables
+
+Now that we can print the values on the console we can play around with changing the values of the variables.
+
+**To the Mathematicians:** Variables are aliases to memory cells and they can be changed in the course of program execution. They are not like variables in a mathematical equations, where they are _placeholders_ to express something specific (yet to be found or to be defined).
+
+We remove the line with the `Hello, world!` message and add two more lines behind the remaining `println! ...`:
+
+* assign a new value to `apples`
+* print all the values again.
+
+```rust
+apples = 12;
+println!("Now, there are {} apples, we see {} fingers and how many peanuts? {}, exactly.",
+    apples, fingers, peanuts);
+```
+
+**TODO:** Snapshot for Step 5a `countinghands05a_assig-to-immutable`
+
+
+#### [Testing] Step 5a
+This time we got an error, and it is a rust-typical one.
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+   Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+src/main.rs:8:5: 8:16 error: re-assignment of immutable variable `apples` [E0384]
+src/main.rs:8     apples = 12;
+                  ^~~~~~~~~~~
+src/main.rs:8:5: 8:16 help: run `rustc --explain E0384` to see a detailed explanation
+src/main.rs:2:9: 2:15 note: prior assignment occurs here
+src/main.rs:2     let apples = 8;
+                      ^~~~~~
+error: aborting due to previous error
+error: Could not compile `countinghands`.
+
+To learn more, run the command again with --verbose.
+```
+
+Where to look? It works like with the warning discussed above:
+```
+src/main.rs:8:5: 8:16 error: re-assignment of immutable variable `apples` [E0384]
+```
+
+Rust _prevents_ us from changing the value of a variable unless we declare it to be mutable, `mut`:
+```rust
+let mut apples = 8;
+```
+
+**TODO:** Snapshot for Step 5b `countinghands05b_assig-to-mutable`
+
+#### [Testing] Step 5b
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+   Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.32 secs
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/countinghands`
+There are 8 apples, we see 3 fingers and how many peanuts? 2, exactly.
+Now, there are 12 apples, we see 3 fingers and how many peanuts? 2, exactly.
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+
+#### [Explanation] Step 5
+We have worked on a _program_. The _source code_ in this case in the file `main.rs` describes (from top to bottom) all the steps that should happen when executing the programm (starting the application).
+
+1. Declare variable `apples` as mutable.
+2. Declare variable `fingers`.
+3. Declare variable `peanuts`.
+4. Output all three values to the console
+    * where `{}` marks the positions in the _format string_ `"There are {} appl. . .`
+    * at which to substitute the values of the variables
+    * given after the format string (in the next line).
+    * (This explanation of step 4 is certainly more precise than it needs to be at this point.)
+5. The value of the memory cell, alias `apples` is changed from `8` to `18`.
+6. Output the values again, with a slightly altered message.
+
+
+### Step Using Operations
+
+From an information processing POV, whenever something accesses or manipulates data we can say that it is an _operation_.
+
+* Assigning a value to a _location in memory_/_a variable_ is an operation. (See previous step).
+
+* Increasing or decreasing a value is an operation
+
+* Comparing two values is an operation. It does not change any values in memory but the result of the comparison can influence the subsequent course of program execution.
+
+Rust already 'knows' a lot of operations.
+
+
+####
+
+#### Step 6a: Increase a variable by one.
+
+print the result of the increase
+
+#### Step 6_: Add two variables and print the result
+
+print the result of the increase
+
+
+### Step 7: Finalise the Counting Hands
+
+#### Step 7a: Try the program as outlined in _Operations_ section (it will not compile of course)
+
+#### Step 7b: Define your own operations
+
+```
+fn count_one_up(hand) {
+    hand + 1
+}
+```
+
+#### Step 7c: Use your operations
+
+
 
 Project: Graphics in a Window
 -----------------------------
