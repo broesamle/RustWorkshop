@@ -1,10 +1,5 @@
 
 
-Minimal Instructives
-====================
-
-
-
 Project: Graphics in a Window
 -----------------------------
 
