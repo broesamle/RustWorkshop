@@ -1,7 +1,7 @@
 
 
 Project: Graphics in a Window
------------------------------
+=============================
 
 * Operating System
 * compiler
