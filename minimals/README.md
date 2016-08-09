@@ -3,12 +3,8 @@
 Minimal Instructives
 ====================
 
-A collection of small instructive examples for learning rust.
-Typically the examples start from scratch with an empty or trivial 'initial commit' in order to then use git diffs for each step towards a more interesting version, until the example is finalised.
-
-
-Rust for absolute beginners
----------------------------
+Intro: Rust for absolute beginners
+----------------------------------
 
 Computers are complex machinery.
 * Making a microchip out of a piece of silicium to do calculations is not trivial.
@@ -32,8 +28,7 @@ Programming languages are tools to handle part of the complexities of the machin
     * It will bring you in contact with the priciples of computing machinery: Your PC, tablet,  mobile phone, more specific microcontrolers . . .
 
 
-Information Processing Technology
----------------------------------
+### Information Processing Technology
 
 <img src="../images/fingers-1_smaller.jpg" width="20%"/>
 <img src="../images/fingers-2_smaller.jpg" width="20%"/>
@@ -51,6 +46,7 @@ Why is calculating with hands or with calculator so much simpler than making a m
 Programming means to transform the knowledge of person into a sequence of instructions suitable for a stupid piece of silicium to execute them. That is why calculating is relatively simple, but making a calculator is not.
 
 []()
+
 
 ### Memory
 
@@ -80,7 +76,8 @@ As a human, you can relax and focus on two parts only: variables' names and thei
 
 As I mentioned above, programming languages were designed to mediate between the technical complexities and the way humans prefer to think. Variables are the first feature we will learn in this respect.
 
-#### Start your first rust project
+First Project: Counting Hands
+-----------------------------
 
 ### Step1: Your first project
 
