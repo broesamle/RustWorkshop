@@ -174,3 +174,122 @@ fn main() {
     println!("Hello, world!");
 }
 ```
+
+
+
+
+### Step 3: Your first lines of source code
+
+In the former step you have seen the _listing_ of the source code (in file `main.rs`). In order to make changes to the source code you need to use a _text editor_. This is different to a word processor. It edits only the characters but does not allow to introduce any formatting, like **bold** or _italics_ and the like.
+
+Open `main.rs` in your favourite text editor which you should have installed on your system before.
+
+TODO: Link to the tut for setting up the machine tutorial
+
+If you are unsure what to use you can -- for now -- try some of the following commands:
+
+
+```
+geany src/main.rs &
+
+atom src/main.rs &
+
+gedit src/main.rs &
+
+kate src/main.rs &
+
+nano src/main.rs &
+
+pico src/main.rs &
+
+. . .
+```
+According to the primary addressees of this comment I have chosen those candidates which loosely resemble the behaviour of a word processor.
+
+> I should remark, though, that the question _What editor to use_ is among the topics discussed most emotionally in the community ;-)
+
+----
+
+#### &#9736; Pitfall
+
+If you see your code nicely arranged on a _page_:
+
+<img src="../images/wordprocessor-screenshot1.jpg" width="60%" />
+
+And you can change the format of some part of the overall code like this
+
+<img src="../images/wordprocessor-screenshot2.jpg" width="60%" />
+
+then it is not a text editor but a word processor. If you save the file from there it will put all sorts of things in it but it will no longer be something the _rust built system_ would understand.
+
+#### &#9728; Pitfall avoided!
+
+----
+
+If all goes well you should see the source code as an opened document in some editor. Nowadays editors often increase legibility by colouring different parts of the code differently; further evidence that you picked a programmers tool rather than an office document solution.
+
+Returning to the section on variables you will find the three lines of rust code, each line for one variable:
+```
+let apples = 8;
+let fingers = 3;
+let peanuts = 2;
+```
+Insert them into the open file after the first line, which should then look something like this:
+
+<img src="../images/editor-screenshot2.jpg" width="60%" />
+
+Save the file to disk (keeping the original name).
+
+#### [Testing] Step 3
+
+If you return to the console using `cat` again,  you can check if the saving was successful:
+
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cat src/main.rs
+fn main() {
+    let apples = 8;
+    let fingers = 3;
+    let peanuts = 2;
+    println!("Hello, world!");
+}
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+
+You should see the three inserted lines in the listing. Now you know they are in the (updated) source file let's give it a try and see what the rust build system says: `cargo build`
+
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+src/main.rs:2:9: 2:15 warning: unused variable: `apples`, #[warn(unused_variables)] on by default
+src/main.rs:2     let apples = 8;
+                      ^~~~~~
+src/main.rs:3:9: 3:16 warning: unused variable: `fingers`, #[warn(unused_variables)] on by default
+src/main.rs:3     let fingers = 3;
+                      ^~~~~~~
+src/main.rs:4:9: 4:16 warning: unused variable: `peanuts`, #[warn(unused_variables)] on by default
+src/main.rs:4     let peanuts = 2;
+                      ^~~~~~~
+```
+
+Whow, that looks complicated ... as a professional, we quickly scan whether it is _errors_ or 'just' _warnigs_. We are happy because we only got warnings. (Don't be too lazy by ignoring them completely; they are a useful thing in most of the cases.)
+
+What do they say? This is the line to look at first:
+```
+src/main.rs:2:9: 2:15 warning: unused variable: `apples`
+```
+* `unused variable` tells us that we created a variable whithout making use of it (this will be the next step!) in this case the warning apears three times, once for each variable `apples`, `fingers`, `peanuts`.
+
+* `src/main.rs:2:9: 2:15` tells us the source file `src/main.rs`: the code line `2`: the column `9` where the 'problematic' bit starts; similarly where it ends.
+
+* fortunately the added lines visualise the location again:
+```
+src/main.rs:2     let apples = 8;
+                      ^~~~~~
+```
+
+`cargo run` will not make much difference (we were already warned about the useless-ness of these three lines of code.
+```
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/countinghands`
+Hello, world!
+```
