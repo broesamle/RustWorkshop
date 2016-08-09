@@ -3,4 +3,6 @@ fn main() {
     let fingers = 3;
     let peanuts = 2;
     println!("Hello, world!");
+    println!("There are {} apples, we see {} fingers and how many peanuts? {}, exactly.",
+        apples, fingers, peanuts);
 }
