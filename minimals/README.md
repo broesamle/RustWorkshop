@@ -17,11 +17,10 @@ Graphics in a Window
 
 TODO: Is it responsible not to introduce closures up to this point?
 
+
 ### Step1: New Project
 
-Make a new project by typing `cargo new --bin graphout` in the console. Instead of `graphout` you can choose whatever name you like.
-
-The following snapshot shows you what cargo will create for you in a subdirectory named `graphout`.
+TODO: we need a link to the intro/fundament example here.
 
 
 #### [Snapshot] Step 1
@@ -30,7 +29,8 @@ The following snapshot shows you what cargo will create for you in a subdirector
 [see changes](https://github.com/broesamle/RustWorkshop/commit/c7dd93813e05d4142ad64fa903013cfa22331f30)
 
 #### [Testing] Step 1
-TODO
+TODO: we need a link to the intro/fundament example here.
+
 
 ### Step2: Access the Windowmanagement (and Graphics Output)
 
