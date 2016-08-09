@@ -398,4 +398,17 @@ There are 8 apples, we see 3 fingers and how many peanuts? 2, exactly.
 Now, there are 12 apples, we see 3 fingers and how many peanuts? 2, exactly.
 [~/projets/RustWorkshop/minimals/countinghands]$
 ```
-The value of the memory cell, alias `apples` was changed from `8` to `18`.
+
+#### [Explanation] Step 5
+We have worked on a _program_. The _source code_ in this case in the file `main.rs` describes (from top to bottom) all the steps that should happen when executing the programm (starting the application).
+
+1. Declare variable `apples` as mutable.
+2. Declare variable `fingers`.
+3. Declare variable `peanuts`.
+4. Output all three values to the console
+    * where `{}` marks the positions in the _format string_ `"There are {} appl. . .`
+    * at which to substitute the values of the variables
+    * given after the format string (in the next line).
+    * (This explanation of step 4 is certainly more precise than it needs to be at this point.)
+5. The value of the memory cell, alias `apples` is changed from `8` to `18`.
+6. Output the values again, with a slightly altered message.
