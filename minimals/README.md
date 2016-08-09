@@ -79,3 +79,70 @@ As a human, you can relax and focus on two parts only: variables' names and thei
 ### Variables in Rust
 
 As I mentioned above, programming languages were designed to mediate between the technical complexities and the way humans prefer to think. Variables are the first feature we will learn in this respect.
+
+#### Start your first rust project
+To do so, you will now set up your machine so that you can actually use Rust.
+
+TODO: Link to how to set up a machine for coding.
+
+### Step1: Your first project
+
+First, you have to open a console window. The console works like a chat window, except that you chat with your _operatin system_ and the things you type in are _commands_ which it would (try to) execute.
+
+TODO: add/link to instructions how to open a console and walk to the directory where the project will be created (also in mac and windows); What is a working directory . . . etc.
+
+Now, you should have a console window open and your working directory/folder should be the place where you want to place the project.
+
+Typically, the console window reminds you of the directory you are in at the moment, here `~/projets/RustWorkshop/minimals` and the `$` indicates that it is waiting for a command to be typed.  Your console should show something like
+
+```
+[~/projets/RustWorkshop/minimals]$
+
+```
+
+Make a new project by typing `cargo new --bin countinghands` into the console. Instead of `countinghands` you can choose whatever name you like.
+
+Not much seems to have happened, except for a new line is shown, again with the working directory reminder and the `$`.
+
+```
+[~/projets/RustWorkshop/minimals]$ cargo new --bin countinghands
+[~/projets/RustWorkshop/minimals]$
+
+```
+Don't worry, not news is good news in this case, cargo does not reply anything if everything goes as expected. You can check about the new project by typing `ls`:
+```
+[~/projets/RustWorkshop/minimals]$ ls
+countinghands  graphout  README.md
+```
+What you will see exactly, will depend on the contents of your directory but you should find the name of your new project among the reply of `ls`.
+
+By typing `cd countinghands` (or whatever name you gave it) you change your working directory so that it is now the project directory.
+
+The following snapshot shows you what cargo will create for you in a subdirectory named `countinghands`.
+
+#### [Testing] Step 1
+Type `cargo build` into the console which should now look something like this:
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+   Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.55 secs
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+Type `cargo run` and you should see
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/countinghands`
+Hello, world!
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+
+Cargo has _built_ the first project into something that your _operating system_ can lounch as an application or 'app'. Traditionally, the minimal app to begin with is one that just sais `Hello world!`. In our case, cargo has already created that for us and you should see `Hello world!` in your console now.
+
+
+#### [Snapshot] Step 1
+Whenever a useful intermediate state is achieved, a _snapshot_ will offer the project (as it should be at this point) for download. Furthermore, you can investigate the changes that were made from the last project.
+
+[download files](https://github.com/broesamle/RustWorkshop/releases/tag/countinghands01_firstproject)
+|
+[see changes](https://github.com/broesamle/RustWorkshop/commit/f46e703d85ea21bf90d1d59c58fa511d5daa7ee8)
