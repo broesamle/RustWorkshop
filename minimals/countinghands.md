@@ -1,10 +1,11 @@
 
 
-Minimal Instructives
-====================
+Rust for absolute beginners
+==================================
 
-Intro: Rust for absolute beginners
-----------------------------------
+
+Introduction
+------------
 
 Computers are complex machinery.
 * Making a microchip out of a piece of silicium to do calculations is not trivial.
