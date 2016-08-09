@@ -3,12 +3,10 @@
 Minimal Instructives
 ====================
 
-A collection of small instructive examples for learning rust.
-Typically the examples start from scratch with an empty or trivial 'initial commit' in order to then use git diffs for each step towards a more interesting version, until the example is finalised.
 
 
-Graphics in a Window
---------------------
+Project: Graphics in a Window
+-----------------------------
 
 * Operating System
 * compiler
@@ -18,7 +16,7 @@ Graphics in a Window
 TODO: Is it responsible not to introduce closures up to this point?
 
 
-### Step1: New Project
+### Step 1: New Project
 
 TODO: we need a link to the intro/fundament example here.
 
@@ -32,7 +30,7 @@ TODO: we need a link to the intro/fundament example here.
 TODO: we need a link to the intro/fundament example here.
 
 
-### Step2: Access the Windowmanagement (and Graphics Output)
+### Step 2: Access the Windowmanagement (and Graphics Output)
 
 The _operating system_ offers functionality for opening a window. In order to use this, we need to `use` a number of _libraries_
 
