@@ -153,3 +153,5 @@ while right_hand > 0 {
 ```
 
 At this point, we can not yet test this example in rust. But we will come back to it after finishing some essential preparations.
+
+[NEXT: Counting Hands Project](countinghands.md)
