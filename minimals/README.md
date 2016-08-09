@@ -74,7 +74,7 @@ As a human, you can relax and focus on two parts only: variables' names and thei
 
 
 
-### Variables in Rust
+#### Variables in Rust
 
 As I mentioned above, programming languages were designed to mediate between the technical complexities and the way humans prefer to think. Variables are the first feature we will learn in this respect.
 
@@ -85,7 +85,69 @@ let fingers = 3;
 let peanuts = 2;
 ```
 
-The follogwing _Counting Hands_ project will guide you into rust so that you can try it yourself.
+The _Counting Hands_ project in the next larger section will guide you into rust so that you can try it yourself.
+
+
+### Operations
+Memory stores the data we want to process. Operations are the steps that actually process the data.
+
+**Count one up:**
+
+<img src="../images/fingers-1_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+<img src="../images/fingers-2_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-3_smaller.jpg" width="15%"/>
+
+**Count one down:**
+
+<img src="../images/fingers-3_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+<img src="../images/fingers-2_smaller.jpg" width="15%"/> &rarr;
+<img src="../images/fingers-1_smaller.jpg" width="15%"/>
+
+If you combine them carefully you can do proper calculations:
+
+**Add hands:**
+
+Yes, I should say add the value of one hand to the value in another.
+
+<img src="../images/fingers-1_smaller.jpg" width="15%"/>
++
+<img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+How do we do it? Here is a simple _program_ for adding two numbers with hands and fingers:
+
+As long as we see a finger in the right hand we:
+* `count one down` on the right hand and
+* `count one up` on the left hand
+
+And this is how it executes for 1 + 2:
+
+1. **Left:** <img src="../images/fingers-1_smaller.jpg" width="15%"/>  **Right:** <img src="../images/fingers-2_smaller.jpg" width="15%"/>
+
+2. **Left:** <img src="../images/fingers-2_smaller.jpg" width="15%"/>  **Right:** <img src="../images/fingers-1_smaller.jpg" width="15%"/>
+
+3. **Left:** <img src="../images/fingers-3_smaller.jpg" width="15%"/>  **Right:** Yes, I should have taken a picture of a hand showing zero fingers.
+
+4. You are getting the point. Now that the right hand does not show any fingers we do not continue and in the right hand have our
+**Result!!**
+
+#### Operations in Rust
+In rust, you would express this as follows
+
+```
+let mut left_hand = 1;
+let mut right_hand = 2;
+
+while right_hand > 0 {
+    left_hand = count_one_up(left_hand);
+    right_hand = count_one_down(right_hand);
+}
+```
+
+At this point, we can not yet test this example in rust. But we will come back to it after finishing some essential preparations.
 
 
 First Project: Counting Hands
@@ -412,3 +474,42 @@ We have worked on a _program_. The _source code_ in this case in the file `main.
     * (This explanation of step 4 is certainly more precise than it needs to be at this point.)
 5. The value of the memory cell, alias `apples` is changed from `8` to `18`.
 6. Output the values again, with a slightly altered message.
+
+
+### Step Using Operations
+
+From an information processing POV, whenever something accesses or manipulates data we can say that it is an _operation_.
+
+* Assigning a value to a _location in memory_/_a variable_ is an operation. (See previous step).
+
+* Increasing or decreasing a value is an operation
+
+* Comparing two values is an operation. It does not change any values in memory but the result of the comparison can influence the subsequent course of program execution.
+
+Rust already 'knows' a lot of operations.
+
+
+####
+
+#### Step 6a: Increase a variable by one.
+
+print the result of the increase
+
+#### Step 6_: Add two variables and print the result
+
+print the result of the increase
+
+
+### Step 7: Finalise the Counting Hands
+
+#### Step 7a: Try the program as outlined in _Operations_ section (it will not compile of course)
+
+#### Step 7b: Define your own operations
+
+```
+fn count_one_up(hand) {
+    hand + 1
+}
+```
+
+#### Step 7c: Use your operations
