@@ -19,9 +19,11 @@ Programming languages are tools to handle part of the complexities of the machin
 
 * If you prefer quick results over a deeper understanding of the machines you are working on, I do not recommend this course to you. I.e. if you are striving for web development there is no need for the level of control rust is offering you. In that case you can save a lot of time in mastering the (beautiful) complexities that come in tow with the core design of rust as a language.
 
-    * For instance, [Python](xxx), [Ruby](xxx), [Java](xxx), [Java Script](xxx) offer much more background functionality to make contemporary information processing machinery convenient to use.
+    * For instance, [Python](https://www.python.org/), [Ruby](https://www.ruby-lang.org/), [Java][1java], [Java Script](https://en.wikipedia.org/wiki/JavaScript) offer much more background functionality to make contemporary information processing machinery convenient to use.
     * You see less of the complexity . . .
     * . . . and you have to learn less about it.
+
+[1java]: https://en.wikipedia.org/wiki/Java_(programming_language)
 
 * Rust, was designed as a systems programming language.
     * Its purpose is not to hide the compexity away from its users but to expose it to them.
