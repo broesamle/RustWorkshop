@@ -1,5 +1,5 @@
 fn main() {
-    let apples = 8;
+    let mut apples = 8;
     let fingers = 3;
     let peanuts = 2;
 
@@ -8,5 +8,4 @@ fn main() {
     apples = 12;
     println!("Now, there are {} apples, we see {} fingers and how many peanuts? {}, exactly.",
         apples, fingers, peanuts);
-
 }

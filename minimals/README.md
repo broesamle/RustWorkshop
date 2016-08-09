@@ -310,9 +310,8 @@ println!("There are {} apples, we see {} fingers and how many peanuts? {}, exact
 |
 [raw source **main.rs**](https://github.com/broesamle/RustWorkshop/raw/76b438d255e60800c108a129fd646ebada7e2222/minimals/countinghands/src/main.rs)
 
+
 #### [Testing] Step 4
-
-
 You have to save the file and build the project, just as before.
 Nice, the warnings about the unused variables are gone!
 
@@ -335,3 +334,68 @@ There are 8 apples, we see 3 fingers and how many peanuts? 2, exactly.
 #### [Explanation] Step 4
 
 TODO insert explanation for formatted output!
+
+
+### Step 5: Change the values of variables
+
+Now that we can print the values on the console we can play around with changing the values of the variables.
+
+**To the Mathematicians:** Variables are aliases to memory cells and they can be changed in the course of program execution. They are not like variables in a mathematical equations, where they are _placeholders_ to express something specific (yet to be found or to be defined).
+
+We remove the line with the `Hello, world!` message and add two more lines behind the remaining `println! ...`:
+
+* assign a new value to `apples`
+* print all the values again.
+
+```rust
+apples = 12;
+println!("Now, there are {} apples, we see {} fingers and how many peanuts? {}, exactly.",
+    apples, fingers, peanuts);
+```
+
+**TODO:** Snapshot for Step 5a `countinghands05a_assig-to-immutable`
+
+
+#### [Testing] Step 5a
+This time we got an error, and it is a rust-typical one.
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+   Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+src/main.rs:8:5: 8:16 error: re-assignment of immutable variable `apples` [E0384]
+src/main.rs:8     apples = 12;
+                  ^~~~~~~~~~~
+src/main.rs:8:5: 8:16 help: run `rustc --explain E0384` to see a detailed explanation
+src/main.rs:2:9: 2:15 note: prior assignment occurs here
+src/main.rs:2     let apples = 8;
+                      ^~~~~~
+error: aborting due to previous error
+error: Could not compile `countinghands`.
+
+To learn more, run the command again with --verbose.
+```
+
+Where to look? It works like with the warning discussed above:
+```
+src/main.rs:8:5: 8:16 error: re-assignment of immutable variable `apples` [E0384]
+```
+
+Rust _prevents_ us from changing the value of a variable unless we declare it to be mutable, `mut`:
+```rust
+let mut apples = 8;
+```
+
+**TODO:** Snapshot for Step 5b `countinghands05b_assig-to-mutable`
+
+#### [Testing] Step 5b
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+   Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.32 secs
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/countinghands`
+There are 8 apples, we see 3 fingers and how many peanuts? 2, exactly.
+Now, there are 12 apples, we see 3 fingers and how many peanuts? 2, exactly.
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+The value of the memory cell, alias `apples` was changed from `8` to `18`.
