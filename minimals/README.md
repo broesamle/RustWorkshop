@@ -293,3 +293,45 @@ src/main.rs:2     let apples = 8;
      Running `target/debug/countinghands`
 Hello, world!
 ```
+
+### Step 4: Print the values of the variables
+
+Just insert these two lines right after `println!("Hello, world!");`:
+
+```
+println!("There are {} apples, we see {} fingers and how many peanuts? {}, exactly.",
+    apples, fingers, peanuts);
+```
+
+#### [Snapshot] Step 4
+[inspect the source](https://github.com/broesamle/RustWorkshop/blob/76b438d255e60800c108a129fd646ebada7e2222/minimals/countinghands/src/main.rs)
+|
+[see changes](https://github.com/broesamle/RustWorkshop/commit/76b438d255e60800c108a129fd646ebada7e2222)
+|
+[raw source **main.rs**](https://github.com/broesamle/RustWorkshop/raw/76b438d255e60800c108a129fd646ebada7e2222/minimals/countinghands/src/main.rs)
+
+#### [Testing] Step 4
+
+
+You have to save the file and build the project, just as before.
+Nice, the warnings about the unused variables are gone!
+
+Now, run the project.
+
+Your console should now look like this:
+
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo build
+   Compiling countinghands v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/countinghands)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.37 secs
+[~/projets/RustWorkshop/minimals/countinghands]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/countinghands`
+Hello, world!
+There are 8 apples, we see 3 fingers and how many peanuts? 2, exactly.
+[~/projets/RustWorkshop/minimals/countinghands]$
+```
+
+#### [Explanation] Step 4
+
+TODO insert explanation for formatted output!
