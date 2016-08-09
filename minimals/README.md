@@ -76,6 +76,16 @@ As a human, you can relax and focus on two parts only: variables' names and thei
 
 As I mentioned above, programming languages were designed to mediate between the technical complexities and the way humans prefer to think. Variables are the first feature we will learn in this respect.
 
+In rust you can express the situation like this
+```
+let apples = 8;
+let fingers = 3;
+let peanuts = 2;
+```
+
+The follogwing _Counting Hands_ project will guide you into rust so that you can try it yourself.
+
+
 First Project: Counting Hands
 -----------------------------
 
