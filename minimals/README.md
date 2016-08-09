@@ -160,16 +160,15 @@ Now that we have already used the `cargo` _build system_ for to create your firs
 * The _build system_ translates the source code into something that . . .
 * . . . your operating system can start as an _application_ or _executable_.
 
-The sources are located in the subdirectory `src` in your project folder. Lets have a look: `cd src` and ls should show you that the file `main.rs` is there.
+The sources are located in the subdirectory `src` in your project folder. Lets have a look: `ls src/` should show you that the file `main.rs` is there.
 
 ```
-[~/projets/RustWorkshop/minimals/countinghands]$ cd src
-[~/projets/RustWorkshop/minimals/countinghands/src]$ ls
+[~/projets/RustWorkshop/minimals/countinghands/src]$ ls src/
 main.rs
 [~/projets/RustWorkshop/minimals/countinghands/src]
 ```
 
-`cat main.rs` finally shows you 'the program', the source of the program, to be precise:
+`cat src/main.rs` finally shows you 'the program', the source of the program, to be precise:
 ```
 fn main() {
     println!("Hello, world!");
