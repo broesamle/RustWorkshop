@@ -1,4 +1,9 @@
+----
+TODO: This branch needs to be restructured into the minimal examples scheme with parallel branches for each example.
 
+TODO: Also, There is an instructive pitfall with a semicolon in an if let statement that is worth explaining in more detail (return value vs. no return value!!)
+
+----
 
 Minimal Instructives
 ====================
