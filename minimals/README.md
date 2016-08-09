@@ -81,9 +81,6 @@ As a human, you can relax and focus on two parts only: variables' names and thei
 As I mentioned above, programming languages were designed to mediate between the technical complexities and the way humans prefer to think. Variables are the first feature we will learn in this respect.
 
 #### Start your first rust project
-To do so, you will now set up your machine so that you can actually use Rust.
-
-TODO: Link to how to set up a machine for coding.
 
 ### Step1: Your first project
 
@@ -143,6 +140,29 @@ Cargo has _built_ the first project into something that your _operating system_ 
 #### [Snapshot] Step 1
 Whenever a useful intermediate state is achieved, a _snapshot_ will offer the project (as it should be at this point) for download. Furthermore, you can investigate the changes that were made from the last project.
 
+
 [download files](https://github.com/broesamle/RustWorkshop/releases/tag/countinghands01_firstproject)
 |
 [see changes](https://github.com/broesamle/RustWorkshop/commit/f46e703d85ea21bf90d1d59c58fa511d5daa7ee8)
+
+### Step 2: Where is 'the program'?
+Now that we have already used the `cargo` _build system_ for to create your first app the next obvious question is: Where is 'the program'. There is three important components involved:
+* The _source code_ is what humans can read and write. Here, this is written in _Rust_.
+* The _build system_ translates the source code into something that . . .
+* . . . your operating system can start as an _application_ or _executable_.
+
+The sources are located in the subdirectory `src` in your project folder. Lets have a look: `cd src` and ls should show you that the file `main.rs` is there.
+
+```
+[~/projets/RustWorkshop/minimals/countinghands]$ cd src
+[~/projets/RustWorkshop/minimals/countinghands/src]$ ls
+main.rs
+[~/projets/RustWorkshop/minimals/countinghands/src]
+```
+
+`cat main.rs` finally shows you 'the program', the source of the program, to be precise:
+```
+fn main() {
+    println!("Hello, world!");
+}
+```
