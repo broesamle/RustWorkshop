@@ -2,8 +2,19 @@
 
 This is work in progress!! Most of the sections are still missing !!!
 
+
 Rust for absolute beginners
 ==================================
+
+
+Units
+-----
+
+[Counting Hands Project](countinghands.md)
+
+[Graphics in a Window](graphout.md)
+
+[Multithreaded Console Output](multiprint.md)
 
 
 Introduction

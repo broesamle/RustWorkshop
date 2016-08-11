@@ -207,3 +207,5 @@ The great change is to replace `loop {}` with an (admittedly not exactly trivial
 
 #### [Testing] Step 3c
 The main difference is that now, we can close the window by pressing the close button `(x)` in the title bar. Again, this is not spectacular in itself but it indicates progress towards a smooth integration with the window system.
+
+[NEXT: Multithreaded Console Output](multiprint.md)
