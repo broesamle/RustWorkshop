@@ -1,17 +1,8 @@
-----
-TODO: This branch needs to be restructured into the minimal examples scheme with parallel branches for each example.
 
-TODO: Also, There is an instructive pitfall with a semicolon in an if let statement that is worth explaining in more detail (return value vs. no return value!!)
 
-----
+Multiprint
+==========
 
-Minimal Instructives
-====================
-
-A collection of small instructive examples demonstrating issues related to
-multithreadding in rust.
-
-I should mention that this is not (yet) meant as a stand-alone tutorial but as a collection of small examples touching on key concepts a rust learner will encounter. The first example, despite the fact of being not even 50 lines of rust code, introduces
 * Multiple threads running concurrently
 * Have the main thread `join` its child threads in order to keep central ressources (here `stdout`) available for the child threads
 * Shared ressources
