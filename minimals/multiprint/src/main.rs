@@ -8,4 +8,8 @@ fn main() {
         println!("Started thread number {:?}.", num);
     }
     println!("Vector of {} join handles.", threads.len());
+    for num in (0..10).rev() {
+        let thr = threads.remove(num);
+        println!("Joined thread number {:?}.", num);
+    }
 }
