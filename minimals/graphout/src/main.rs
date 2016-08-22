@@ -1,12 +1,15 @@
 extern crate piston;
 extern crate glutin_window;
 extern crate opengl_graphics;
+extern crate graphics;
 
 use glutin_window::GlutinWindow as Window;
 use piston::window::WindowSettings;
 use opengl_graphics::{GlGraphics, OpenGL};
 use piston::event_loop::Events;
 use piston::input::RenderEvent;
+use graphics::rectangle;
+
 
 fn main() {
     let mut window: Window =
