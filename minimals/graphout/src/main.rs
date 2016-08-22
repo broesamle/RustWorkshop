@@ -10,6 +10,7 @@ use piston::event_loop::Events;
 use piston::input::RenderEvent;
 use graphics::rectangle;
 
+const RED:   [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
 fn main() {
     let mut window: Window =
@@ -23,7 +24,8 @@ fn main() {
     while let Some(e) = events.next(&mut window) {
         if let Some(r) = e.render_args() {
             gl.draw(r.viewport(), |c, gl| {
-                // all  drawing actions will happen here soon
+                let square = rectangle::square(0.0, 0.0, 50.0);
+                rectangle(RED, square, c.transform, gl);
             });
         }
     }
