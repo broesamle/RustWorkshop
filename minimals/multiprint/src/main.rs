@@ -10,7 +10,7 @@ fn main() {
     println!("Vector of {} join handles.", threads.len());
     for num in (0..10).rev() {
         let thr = threads.remove(num);
-        thr.join();
-        println!("Joined thread number {:?}.", num);
+        let joinresult = thr.join();
+        println!("Joined thread number {:?}, {:?}.", num, joinresult);
     }
 }
