@@ -334,6 +334,9 @@ What we have done here almost exactly matches the example on
 Minimal 'print server'
 ----------------------
 
+TODO: This section is still to be reworked into the new snapshot scheme (see previous section and the other minimals' `*.md` files.
+
+
 
 ### A non-terminating thread looking for print jobs
 
