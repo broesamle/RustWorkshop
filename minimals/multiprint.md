@@ -12,22 +12,17 @@ Multiprint
 * Static Strings vs. dynamically generated strings
 * Lifetime
 
-
 Console output from multiple threads
 ------------------------------------
 
-### How it does not work
 
-```
-use std::thread;
+### Step 1: How it does not work
 
-fn main() {
-    for num in 0..10 {
-        thread::spawn(move || { println!("Thread {}", num); });
-    }
-}
-```
+#### [Snapshot] Step 1a:
+TODO: Label for
+https://github.com/broesamle/RustWorkshop/commit/d08ef2617c35913cce417e1e3048f4598a0e11a9
 
+#### [Testing] Step 1a:
 We get a different output on every run:
 
 ```
@@ -55,23 +50,9 @@ Thread 1
 Thread 5
 Thread 4
 [~/projets/RustWorkshop/minimals/aa_multiprint]$ cargo run
-    Finished debug [unoptimized + debuginfo] target(s) in 0.1 secs
-     Running `target/debug/aa_multiprint`
-Thread 0
-Thread 1
-Thread 2
-Thread 3
-Thread 4
-[~/projets/RustWorkshop/minimals/aa_multiprint]$ cargo run
-    Finished debug [unoptimized + debuginfo] target(s) in 0.1 secs
-     Running `target/debug/aa_multiprint`
-Thread 0
-Thread 1
-Thread 2
-Thread 5
-Thread 4
-Thread 6
-[~/projets/RustWorkshop/minimals/aa_multiprint]$
+
+. . .
+
 ```
 
 Occasionally we get:
@@ -80,77 +61,281 @@ Occasionally we get:
 thread '<unnamed>' panicked at 'cannot access stdout during shutdown', src/libcore/option.rs:700
 note: Run with `RUST_BACKTRACE=1` for a backtrace.
 ```
-indicating that the standard output was already 'broken' while the child process still wanted to use it.
+indicating that something (the standard output component) was (already) 'broken' while some (the child) process (still) wanted to use it.
 
-To understand more of what is going on, we collect the result of the spawning in a vector and we do more verbose output:
-```
-use std::thread;
 
-fn main() {
-    let mut threads = Vec::new();
-    for num in 0..10 {
-        threads.push(thread::spawn(move || {
-            println!("Hello from thread number {}", num);
-        }));
-        println!("Started thread number {:?}.", num);
-    }
-    while let Some(thr) = threads.pop() {
-        println!("Good bye {:?}.", thr.thread());
-    }
-}
+To figure out what is going on here, we follow a common strategy in debugging/understanding information processing systems: Get more information about the actual processing steps -- make our app more 'talkative'.
+
+Let us put some console output after starting each new thread: `println!("Started thread number {:?}.", num);`
+
+#### [Snapshot] Step 1b
+TODO: Label for
+https://github.com/broesamle/RustWorkshop/commit/99eeef5e603b5e8cf5c6f415dfb6972cd46fcdd5
+
+#### [Testing] Step 1b
+This gives us the following output:
 
 ```
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo run
+   Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.49 secs
+     Running `target/debug/multiprint`
+Started thread number 0.
+Started thread number 1.
+Started thread number 2.
+Thread 0
+Started thread number 3.
+Thread 2
+Thread 3
+Thread 1
+Started thread number 4.
+Started thread number 5.
+Thread 4
+Started thread number 6.
+Started thread number 7.
+Started thread number 8.
+Thread 6
+Thread 8
+Thread 5
+Started thread number 9.
+Thread 9
+Thread 7
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/multiprint`
+Started thread number 0.
+Started thread number 1.
+Started thread number 2.
+Thread 0
+Thread 1
+Thread 2
+Started thread number 3.
+Started thread number 4.
+Started thread number 5.
+Started thread number 6.
+Thread 3
+Thread 6
+Thread 4
+Thread 5
+Started thread number 7.
+Started thread number 8.
+Started thread number 9.
+Thread 8
+Thread 7
+[~/projets/RustWorkshop/minimals/multiprint]$
+```
 
-Despite the fact that occasionally messages are missing from the output (here `Hello from thread number 9`) all threads are correctly started, there is always 10 elements in `vec` as we always see 10 `Good bye`s.
+We see that all threads are started (initiated, `spawn`ed) in both runs but we see some console output missing (here: `Thread 9`). So, number nine is spawned but its effort to print a message to the console is not successful -- presumably because the the 'something' is already shot down when the threads want to use it.
 
+What has to happen here is to prevent the main program to be already shod down while there is still children doing their businesses, using the (console printing) infrastructure.
+
+### Step 2: How it does work -- _stay in touch_
+
+When starting a new thread, a handle is returned in order to _stay in touch_ with the child thread. As a first step towards understanding this mechanism, we collect these _handles_ in a vector.
+
+
+What will be achieved in _Step 2_ is to _join_ the child threads -- that is, execution can only continue after the child has finished its business. We will see in a minute how this improves things in our case.
+
+To be able to do so we collect the handles in a vector.
+
+#### [Snapshot] Step 2a
+TODO: Label for
+https://github.com/broesamle/RustWorkshop/commit/342c98a32508069ee8d3a28bb277c0b0e39f6531
+
+#### [Testing] Step 2a
+Output:
 ```
 Started thread number 0.
 Started thread number 1.
 Started thread number 2.
-Hello from thread number 1
-Hello from thread number 0
 Started thread number 3.
-Hello from thread number 2
-Hello from thread number 3
+Thread 0
+Thread 1
+Thread 2
 Started thread number 4.
-Hello from thread number 4
+Thread 4
+Thread 3
 Started thread number 5.
-Hello from thread number 5
+Thread 5
 Started thread number 6.
-Hello from thread number 6
+Thread 6
 Started thread number 7.
-Hello from thread number 7
 Started thread number 8.
-Hello from thread number 8
+Thread 7
+Thread 8
 Started thread number 9.
-Good bye None.
-Good bye None.
-Good bye None.
-Good bye None.
-Good bye None.
-Good bye None.
-Good bye None.
-Good bye None.
-Good bye None.
-Good bye None.
+Vector of 10 join handles.
+Thread 9
 ```
 
-### How it works: explicitly joining the threads.
+Despite the fact we already know (and can print) the length of that vector (after spawning all threads) the threads still take their time to get done their individual console outputs. Again, the output of the late birds being dropped, occasionally.
 
-When explicitly joining all the threads (forcing the main thread with stdout to wait for the children to finish) the messages from the threads are all properly printed (in varying order, though).
+
+So we run a second loop through all the handles. As an additional control, we print a message for each thread.
+
+#### [Snapshot] Step 2b
+TODO Label for
+https://github.com/broesamle/RustWorkshop/commit/a4df5c004a949c03aec3bce6272d6bcff137f464
+
+#### [Testing] Step 2b
+
+Building gives us:
+```
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo build
+   Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+src/main.rs:12:13: 12:16 warning: unused variable: `thr`, #[warn(unused_variables)] on by default
+src/main.rs:12         let thr = threads.remove(num);
+                           ^~~
+    Finished debug [unoptimized + debuginfo] target(s) in 0.56 secs
+```
+
+hmhmhm 'just a warning' so let's test ;-)
 
 ```
-while let Some(thr) = threads.pop() {
-    thr.join();
-    println!("Good bye.");
-}
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/multiprint`
+Started thread number 0.
+Started thread number 1.
+Started thread number 2.
+Started thread number 3.
+Thread 1
+Thread 2
+Thread 0
+Started thread number 4.
+Thread 3
+Thread 4
+Started thread number 5.
+Thread 5
+Started thread number 6.
+Thread 6
+Started thread number 7.
+Started thread number 8.
+Thread 8
+Started thread number 9.
+Vector of 10 join handles.
+Joined thread number 9.
+Thread 7
+Joined thread number 8.
+Joined thread number 7.
+Joined thread number 6.
+Joined thread number 5.
+Joined thread number 4.
+Joined thread number 3.
+Joined thread number 2.
+Joined thread number 1.
+Joined thread number 0.
+Thread 9
 ```
+Weird. After joining thread `9..0` there is still a message coming in from thread 9.
 
-cf. [threads at rustbyexample](http://rustbyexample.com/std_misc/threads.html)
+Reading the warning carefully -- which I strongly recommend -- tells us exactly what is missing here. `thr` is not used anywhere, i.e. not for joining the threads. In a hurry we forgot the essential part, the `join`.
+
+
+
+#### [Snapshot] Step 2c
+TODO Label for
+https://github.com/broesamle/RustWorkshop/commit/56fcd406414e5eb646291930cda735ee7ce60593
+
+
+#### [Testing] Step 2c
+It builds:
+```
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo build
+   Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+src/main.rs:13:9: 13:20 warning: unused result which must be used, #[warn(unused_must_use)] on by default
+src/main.rs:13         thr.join();
+                       ^~~~~~~~~~~
+    Finished debug [unoptimized + debuginfo] target(s) in 0.55 secs
+
+```
+Running it shows that it now works as expected. All outputs from the subthreads are present before the second loop finalises the execution of the main thread by joining the children.
+```
+Started thread number 0.
+Started thread number 1.
+Started thread number 2.
+Started thread number 3.
+Started thread number 4.
+Thread 3
+Thread 2
+Thread 1
+Thread 0
+Thread 4
+Started thread number 5.
+Thread 5
+Started thread number 6.
+Thread 6
+Started thread number 7.
+Thread 7
+Started thread number 8.
+Thread 8
+Started thread number 9.
+Vector of 10 join handles.
+Thread 9
+Joined thread number 9.
+Joined thread number 8.
+Joined thread number 7.
+Joined thread number 6.
+Joined thread number 5.
+Joined thread number 4.
+Joined thread number 3.
+Joined thread number 2.
+Joined thread number 1.
+Joined thread number 0.
+```
+Again there was a warning: Rust wants us to use the result of the joining -- presumably because this result can be quite important, from an overall system's functionality POV.
+
+Here we go:
+
+#### TODO: Snapshot 2d
+https://github.com/broesamle/RustWorkshop/commit/7a9fcaf4b1db87160caf5cb80f919d8f53bdc7c2
+
+#### TODO: Testing 2d
+
+```
+Started thread number 0.
+Started thread number 1.
+Thread 0
+Thread 1
+Started thread number 2.
+Started thread number 3.
+Started thread number 4.
+Thread 3
+Started thread number 5.
+Thread 2
+Started thread number 6.
+Started thread number 7.
+Thread 5
+Thread 6
+Thread 4
+Started thread number 8.
+Thread 7
+Thread 8
+Started thread number 9.
+Vector of 10 join handles.
+Thread 9
+Joined thread number 9, Ok(()).
+Joined thread number 8, Ok(()).
+Joined thread number 7, Ok(()).
+Joined thread number 6, Ok(()).
+Joined thread number 5, Ok(()).
+Joined thread number 4, Ok(()).
+Joined thread number 3, Ok(()).
+Joined thread number 2, Ok(()).
+Joined thread number 1, Ok(()).
+Joined thread number 0, Ok(()).
+```
+Looks nice ... all threds reply `Ok(())` :-)
+
+What we have done here almost exactly matches the example on  
+[threads at rustbyexample](http://rustbyexample.com/std_misc/threads.html).
 
 
 Minimal 'print server'
 ----------------------
+
+TODO: This section is still to be reworked into the new snapshot scheme (see previous section and the other minimals' `*.md` files.
+
 
 
 ### A non-terminating thread looking for print jobs
