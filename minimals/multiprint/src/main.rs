@@ -5,13 +5,6 @@ use std::time::Duration;
 fn main() {
     let mut threads = Vec::new();
     let mut printqueue: Vec<String> = Vec::new();
-    printqueue.push(String::from("testpage1"));
-    printqueue.push(String::from("testpage2"));
-    printqueue.push(String::from("testpage3"));
-    printqueue.push(String::from("testpage4"));
-    printqueue.push(String::from("testpage5"));
-    printqueue.push(String::from("testpage6"));
-    printqueue.push(String::from("testpage7"));
     let printqueue_mutex_arc = Arc::new(Mutex::new(printqueue));
     let serverqueue = printqueue_mutex_arc.clone();
     let server = thread::spawn(move || {
