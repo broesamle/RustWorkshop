@@ -1,5 +1,5 @@
 use std::thread;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 fn main() {
@@ -12,8 +12,8 @@ fn main() {
     printqueue.push("testpage5");
     printqueue.push("testpage6");
     printqueue.push("testpage7");
-    let printqueue_arc = Arc::new(printqueue);
-    let serverqueue = printqueue_arc.clone();
+    let printqueue_mutex_arc = Arc::new(Mutex::new(printqueue));
+    let serverqueue = printqueue_mutex_arc.clone();
     let server = thread::spawn(move || {
         loop {
             println!("print queue: {:?}", serverqueue);
@@ -21,7 +21,7 @@ fn main() {
         }
     });
     for num in 0..10 {
-        let clientqueue = printqueue_arc.clone();
+        let clientqueue = printqueue_mutex_arc.clone();
         thread::sleep(Duration::from_millis(50)); // we spawn a new threads every 50 msec
 
         let handle = thread::spawn(move || {
