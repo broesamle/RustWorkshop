@@ -17,18 +17,19 @@ fn main() {
     let server = thread::spawn(move || {
         loop {
             println!("print queue: {:?}", serverqueue);
-            let guard = serverqueue.lock().unwrap();
-            println!("Server thread can read the print queue with {:?} elements.", (*guard).len());
-            thread::sleep(Duration::from_millis(20));
+            let mut guard = serverqueue.lock().unwrap();
+            if let Some(printjob) = (*guard).pop() {
+                println!("printing: {}", printjob);
+            }
+            thread::sleep(Duration::from_millis(300));
         }
     });
     for num in 0..10 {
         let clientqueue = printqueue_mutex_arc.clone();
         thread::sleep(Duration::from_millis(200));
         let handle = thread::spawn(move || {
-            let guard = clientqueue.lock().unwrap();
-            println!("Thread {} can read the print queue with {:?} elements.", num, (*guard).len());
-            thread::sleep(Duration::from_millis(100));
+            let mut guard = clientqueue.lock().unwrap();
+            (*guard).push("Some Print Job.");
         });
         threads.push(handle);
         println!("Started thread number {:?}.", num);
