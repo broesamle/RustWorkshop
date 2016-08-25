@@ -1,14 +1,20 @@
 use std::thread;
+use std::time::Duration;
 
 fn main() {
     let mut threads = Vec::new();
     let server = thread::spawn(move || {
         loop {
             println!("infinite loop alive.");
+            thread::sleep(Duration::from_millis(20));
         }
     });
     for num in 0..10 {
-        let handle = thread::spawn(move || { println!("Thread {}", num); });
+        thread::sleep(Duration::from_millis(50)); // we spawn a new threads every 50 msec
+        let handle = thread::spawn(move || {
+            thread::sleep(Duration::from_millis(100));  // each thread first sleeps for 100 msec
+            println!("Thread {}", num);
+        });
         threads.push(handle);
         println!("Started thread number {:?}.", num);
     }
