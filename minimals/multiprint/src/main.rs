@@ -4,14 +4,14 @@ use std::time::Duration;
 
 fn main() {
     let mut threads = Vec::new();
-    let mut printqueue: Vec<&str> = Vec::new();
-    printqueue.push("testpage1");
-    printqueue.push("testpage2");
-    printqueue.push("testpage3");
-    printqueue.push("testpage4");
-    printqueue.push("testpage5");
-    printqueue.push("testpage6");
-    printqueue.push("testpage7");
+    let mut printqueue: Vec<String> = Vec::new();
+    printqueue.push(String::from("testpage1"));
+    printqueue.push(String::from("testpage2"));
+    printqueue.push(String::from("testpage3"));
+    printqueue.push(String::from("testpage4"));
+    printqueue.push(String::from("testpage5"));
+    printqueue.push(String::from("testpage6"));
+    printqueue.push(String::from("testpage7"));
     let printqueue_mutex_arc = Arc::new(Mutex::new(printqueue));
     let serverqueue = printqueue_mutex_arc.clone();
     let server = thread::spawn(move || {
@@ -30,11 +30,14 @@ fn main() {
     for num in 0..10 {
         let clientqueue = printqueue_mutex_arc.clone();
         let handle = thread::spawn(move || {
+            let mut i = 0;
             loop {
                 println!("Child {}...", num);
                 if let Ok(mut guard) = clientqueue.try_lock() {
-                    println!("...putting job");
-                    (*guard).push("Some Print Job.");
+                    let job = format!("Job {} from Child {}.", i, num);
+                    println!("...putting job: {}", job);
+                    (*guard).push(job);
+                    i += 1;
                 }
                 thread::sleep(Duration::from_millis(500*(num+1)));
             }
