@@ -15,21 +15,29 @@ fn main() {
     let printqueue_mutex_arc = Arc::new(Mutex::new(printqueue));
     let serverqueue = printqueue_mutex_arc.clone();
     let server = thread::spawn(move || {
+        let mut i = 0;
         loop {
-            println!("print queue: {:?}", serverqueue);
-            let mut guard = serverqueue.lock().unwrap();
-            if let Some(printjob) = (*guard).pop() {
-                println!("printing: {}", printjob);
+            println!("[{}] print queue: {:?}", i, serverqueue);
+            if let Ok(mut guard) = serverqueue.try_lock() {
+                if let Some(printjob) = (*guard).pop() {
+                    println!("printing: {}", printjob);
+                }
             }
-            thread::sleep(Duration::from_millis(300));
+            thread::sleep(Duration::from_millis(100));
+            i += 1;
         }
     });
     for num in 0..10 {
         let clientqueue = printqueue_mutex_arc.clone();
-        thread::sleep(Duration::from_millis(200));
         let handle = thread::spawn(move || {
-            let mut guard = clientqueue.lock().unwrap();
-            (*guard).push("Some Print Job.");
+            loop {
+                println!("Child {}...", num);
+                if let Ok(mut guard) = clientqueue.try_lock() {
+                    println!("...putting job");
+                    (*guard).push("Some Print Job.");
+                }
+                thread::sleep(Duration::from_millis(500*(num+1)));
+            }
         });
         threads.push(handle);
         println!("Started thread number {:?}.", num);
