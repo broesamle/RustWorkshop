@@ -1,4 +1,5 @@
 use std::thread;
+use std::sync::Arc;
 use std::time::Duration;
 
 fn main() {
@@ -11,21 +12,19 @@ fn main() {
     printqueue.push("testpage5");
     printqueue.push("testpage6");
     printqueue.push("testpage7");
+    let printqueue_arc = Arc::new(printqueue);
     let server = thread::spawn(move || {
         loop {
             println!("print queue: {:?}", printqueue);
-            if let Some(printjob) = printqueue.pop() {
-                println!("printing: {}", printjob);
-            }
             thread::sleep(Duration::from_millis(20));
         }
     });
     for num in 0..10 {
         thread::sleep(Duration::from_millis(50)); // we spawn a new threads every 50 msec
+
         let handle = thread::spawn(move || {
+            println!("Thread {} can read the print queue: {:?}", num, printqueue);
             thread::sleep(Duration::from_millis(100));  // each thread first sleeps for 100 msec
-            printqueue.push("testpage from client.");
-            println!("Thread {} pushed a job into the queue.", num);
         });
         threads.push(handle);
         println!("Started thread number {:?}.", num);
