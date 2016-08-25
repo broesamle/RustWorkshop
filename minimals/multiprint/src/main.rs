@@ -14,6 +14,9 @@ fn main() {
     let server = thread::spawn(move || {
         loop {
             println!("print queue: {:?}", printqueue);
+            if let Some(printjob) = printqueue.pop() {
+                println!("printing: {}", printjob);
+            }
             thread::sleep(Duration::from_millis(20));
         }
     });
@@ -21,7 +24,8 @@ fn main() {
         thread::sleep(Duration::from_millis(50)); // we spawn a new threads every 50 msec
         let handle = thread::spawn(move || {
             thread::sleep(Duration::from_millis(100));  // each thread first sleeps for 100 msec
-            println!("Thread {}", num);
+            printqueue.push("testpage from client.");
+            println!("Thread {} pushed a job into the queue.", num);
         });
         threads.push(handle);
         println!("Started thread number {:?}.", num);
