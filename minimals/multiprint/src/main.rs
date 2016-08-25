@@ -3,9 +3,17 @@ use std::time::Duration;
 
 fn main() {
     let mut threads = Vec::new();
+    let mut printqueue: Vec<&str> = Vec::new();
+    printqueue.push("testpage1");
+    printqueue.push("testpage2");
+    printqueue.push("testpage3");
+    printqueue.push("testpage4");
+    printqueue.push("testpage5");
+    printqueue.push("testpage6");
+    printqueue.push("testpage7");
     let server = thread::spawn(move || {
         loop {
-            println!("infinite loop alive.");
+            println!("print queue: {:?}", printqueue);
             thread::sleep(Duration::from_millis(20));
         }
     });
