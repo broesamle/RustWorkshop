@@ -17,6 +17,8 @@ fn main() {
     let server = thread::spawn(move || {
         loop {
             println!("print queue: {:?}", serverqueue);
+            let guard = serverqueue.lock().unwrap();
+            println!("Server thread can read the print queue with {:?} elements.", (*guard).len());
             thread::sleep(Duration::from_millis(20));
         }
     });
