@@ -237,7 +237,6 @@ Reading the warning carefully -- which I strongly recommend -- tells us exactly 
 TODO Label for
 https://github.com/broesamle/RustWorkshop/commit/56fcd406414e5eb646291930cda735ee7ce60593
 
-
 #### [Testing] Step 2c
 It builds:
 ```
@@ -334,100 +333,244 @@ What we have done here almost exactly matches the example on
 Minimal 'print server'
 ----------------------
 
-TODO: This section is still to be reworked into the new snapshot scheme (see previous section and the other minimals' `*.md` files.
+Add a _server_ thread running in an infinite loop (while the others are exiting after printing their message on the console).
+
+#### [Snapshot] Step 3a
+TODO Label for commit 3e759605dab677c7e98c563ea6a52a3caeb8aca4
 
 
+#### [Testing] Step 3a
 
-### A non-terminating thread looking for print jobs
+After running this version, all we see is:
+```
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+^C
+```
+And we have to stop it by pressing `Ctrl+C`. Even scrolling up the console window after stopping it really quickly does not show the messages of the other threads. (Did we mention that computers can do calculations _fast_?!
 
-The following example introduces one thread which `loop`s infinitely, looking for 'print jobs' (strings) in the `printqueue`.
+`cargo run > output.txt` helps us here. What we would otherwise see (or not see because it runs too fast) in the console now goes into a text file `output.txt`. It will be located in the `src/` subdirectory.
+
+*Exercise:* It is quite instructive to have a look at the file which, on my machine after ~1 second of execution time produced more than 120000 lines of console output!
+
+*Exercise:* Also, try to remove or comment out the second last two lines, which are responsible for joining the server thread. What output do you get? Explain, what happens.
+```
+//let joinresult = server.join();
+//println!("Joined server thread: {:?}.", joinresult);
+```
+
+Next, let us slow down things a bit by adding some waiting times. Strictly speaking this is not necessary but it helps us using the console for output and seeing the temporal dynamics of multithreaded execution.
+
+
+#### [Snapshot] Step 3b
+TODO Label for commit 72a3f0b6ba87033942037ee450205880b6335c8c
+
+
+#### [Testing] Step 3b
+The exact numbers in the delays are more or less arbitrary -- the example 3b gives something like that as a typical output.
 
 ```
-use std::thread;
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+Started thread number 0.
+infinite loop alive.
+infinite loop alive.
+Started thread number 1.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+Thread 0
+Started thread number 2.
+infinite loop alive.
+infinite loop alive.
+Thread 1
+infinite loop alive.
+Started thread number 3.
+infinite loop alive.
+infinite loop alive.
+Thread 2
+Started thread number 4.
+infinite loop alive.
+infinite loop alive.
+Thread 3
+infinite loop alive.
+Started thread number 5.
+infinite loop alive.
+infinite loop alive.
+Thread 4
+Started thread number 6.
+infinite loop alive.
+infinite loop alive.
+Thread 5
+infinite loop alive.
+Started thread number 7.
+infinite loop alive.
+infinite loop alive.
+Thread 6
+Started thread number 8.
+infinite loop alive.
+infinite loop alive.
+Thread 7
+infinite loop alive.
+Started thread number 9.
+Vector of 10 join handles.
+infinite loop alive.
+infinite loop alive.
+Thread 8
+infinite loop alive.
+infinite loop alive.
+Thread 9
+Joined thread number 9, Ok(()).
+Joined thread number 8, Ok(()).
+Joined thread number 7, Ok(()).
+Joined thread number 6, Ok(()).
+Joined thread number 5, Ok(()).
+Joined thread number 4, Ok(()).
+Joined thread number 3, Ok(()).
+Joined thread number 2, Ok(()).
+infinite loop alive.
+Joined thread number 1, Ok(()).
+Joined thread number 0, Ok(()).
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+infinite loop alive.
+```
 
-fn main() {
-    let mut threads = Vec::new();
-    let mut printqueue: Vec<&str> = Vec::new();
-    printqueue.push("testpage1");
-    printqueue.push("testpage2");
-    printqueue.push("testpage3");
-    printqueue.push("testpage4");
-    printqueue.push("testpage5");
-    printqueue.push("testpage6");
-    printqueue.push("testpage7");
+### Step 4: Print jobs from a queue
 
-    threads.push(thread::spawn(move || {
-        loop {
-            while let Some(printjob) = printqueue.pop() {
-                println!("printing: {}", printjob);
-            }
-        }
-    }));
-    for num in 0..10 {
-        threads.push(thread::spawn(move || {
-            println!("Hello from thread number {}", num);
-        }));
-        println!("Started thread number {:?}.", num);
-    }
-    while let Some(thr) = threads.pop() {
-        let _ = thr.join();
-        println!("Good bye.");
-    }
+After establishing one thread that runs for ever (which is the indended behaviour for a _server_ we can now think about something useful for it to do. As an example we will simulate a print server.
+
+
+The next step establishes a printer queue.
+For testing purposes we add a number of print jobs and then let the server run.
+
+#### [Snapshot] Step 4a
+TODO Label for commit aed3218f7f78acf7e44b38c22bd23ab4f85dc3c3
+
+
+#### [Testing] Step 4a
+Output proves that the server can read (and print to the console) the print queue.
+```
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+Started thread number 0.
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+Started thread number 1.
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+Thread 0
+Started thread number 2.
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+Thread 1
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+Started thread number 3.
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+```
+Now, let us have it `pop` one job from the queue in every iteration of the loop and _print it_.
+
+#### [Snapshot] Step 4b
+TODO Label for commit
+
+
+#### [Testing] Step 4b
+
+```
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+printing: testpage7
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"]
+printing: testpage6
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5"]
+printing: testpage5
+Started thread number 0.
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4"]
+printing: testpage4
+print queue: ["testpage1", "testpage2", "testpage3"]
+printing: testpage3
+print queue: ["testpage1", "testpage2"]
+printing: testpage2
+Started thread number 1.
+print queue: ["testpage1"]
+printing: testpage1
+print queue: []
+Thread 0
+Started thread number 2.
+print queue: []
+print queue: []
+print queue: []
+
+. . .
+```
+
+Nice, the print queue is diminished job by job and the `testpage1..7` are printed (on the console). There is  a lot of code in this example which we currently do not need:
+
+------------
+
+TODO: Remove the following code block and put an *Exercise:* to remove the un-necessary parts.
+```
+for num in 0..10 {
+    thread::sleep(Duration::from_millis(50)); // we spawn a new threads every 50 msec
+    let handle = thread::spawn(move || {
+        thread::sleep(Duration::from_millis(100));  // each thread first sleeps for 100 msec
+        println!("Thread {}", num);
+    });
+    threads.push(handle);
+    println!("Started thread number {:?}.", num);
+}
+println!("Vector of {} join handles.", threads.len());
+for num in (0..10).rev() {
+    let thr = threads.remove(num);
+    let joinresult = thr.join();
+    println!("Joined thread number {:?}, {:?}.", num, joinresult);
 }
 ```
+We will keep them for the next steps, when the other threads will be _clients_ of the print _server_ thread.
 
-This is a typical output:
-
-```
-Started thread number 0.
-Started thread number 1.
-Started thread number 2.
-Hello from thread number 1
-Hello from thread number 2
-printing: testpage7
-printing: testpage6
-printing: testpage5
-printing: testpage4
-printing: testpage3
-printing: testpage2
-printing: testpage1
-Started thread number 3.
-Hello from thread number 0
-Hello from thread number 3
-Started thread number 4.
-Hello from thread number 4
-Started thread number 5.
-Hello from thread number 5
-Started thread number 6.
-Started thread number 7.
-Started thread number 8.
-Hello from thread number 8
-Started thread number 9.
-Hello from thread number 9
-Hello from thread number 7
-Good bye.
-Hello from thread number 6
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-^C
-[~/projets/RustWorkshop/minimals/ac_printserve]$
-```
-
-We recognise that we have to terminate the program execution hitting `Ctrl+C`.
+------------
 
 
-### Print from other threads via the `printqueue`
+Concurrent access
+-----------------
+
+### Step 5: How it does not work
+
 
 This requires other threads to have access to `printqueue`!!!
 
-Rust will certainly prevent us from this naive solution, for good reasons:
+Rust will prevent us from this naive solution, (for good reasons):
 
 ```
 . . .
@@ -439,13 +582,126 @@ for num in 0..10 {
 . . .
 ```
 
-We have moved the `printqueue` when we started the first (printer) thread. Hence, It is no longer available for others to read (or write to) it directly.
+We have _moved_ the `printqueue` when we started the first (printer) thread. Hence, It is no longer available for others to read (or write to) it directly.
+
+line 14 without the `move`: `let server = thread::spawn( || {` gives the following error:
+
+```
+Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+src/main.rs:14:33: 14:35 error: closure may outlive the current function, but it borrows `printqueue`, which is owned by the current function [E0373]
+src/main.rs:14     let server = thread::spawn( || {
+                                            ^~
+src/main.rs:14:33: 14:35 help: run `rustc --explain E0373` to see a detailed explanation
+src/main.rs:16:43: 16:53 note: `printqueue` is borrowed here
+src/main.rs:16             println!("print queue: {:?}", printqueue);
+                                                      ^~~~~~~~~~
+<std macros>:2:27: 2:58 note: in this expansion of format_args!
+<std macros>:3:1: 3:54 note: in this expansion of print! (defined in <std macros>)
+src/main.rs:16:13: 16:55 note: in this expansion of println! (defined in <std macros>)
+src/main.rs:14:33: 14:35 help: to force the closure to take ownership of `printqueue` (and any other referenced variables), use the `move` keyword, as shown:
+src/main.rs        let server = thread::spawn( move || {
+src/main.rs:27:13: 27:23 error: capture of moved value: `printqueue` [E0382]
+src/main.rs:27         let handle = thread::spawn(move || {
+                                               ^~~~~~~
+src/main.rs:27:13: 27:23 help: run `rustc --explain E0382` to see a detailed explanation
+src/main.rs:27:13: 27:23 note: move occurs because `printqueue` has type `std::vec::Vec<&'static str>`, which does not implement the `Copy` trait
+error: aborting due to 2 previous errors
+error: Could not compile `multiprint`.
+
+To learn more, run the command again with --verbose.
+```
+
+For the moment we accept that things to be used in a spawned child thread need to be 'somehow moved' into that child thread.
+
+So we put back the move and deal with less scary looking error message we get...
+
+#### [Snapshot] Step 5a
+TODO Label for commit 1b4da8ec9dafc1273cc3120a32e3c504b63f9093
 
 
-#### Concurrent read access
+#### [Testing] Step 5a
+...this one:
 
-Before thinking about concurrent write (mutable) access to the queue I would like to focus for any form of shared access across threads to the same ressource. Reading is always easier because no changes can happen while reading data. [TODO: Link+hint to rusts rules of (im)mutable references borrowing](xxxxxxxxxx)
-Instead of moving the whole queue we can just move (multiple copies) of references to one (shared) queue.
+```
+src/main.rs:27:13: 27:23 error: capture of moved value: `printqueue` [E0382]
+src/main.rs:27     let server = thread::spawn( move || {
+                                               ^~~~~~~
+src/main.rs:27:13: 27:23 help: run `rustc --explain E0382` to see a detailed explanation
+src/main.rs:27:13: 27:23 note: move occurs because `printqueue` has type `std::vec::Vec<&'static str>`, which does not implement the `Copy` trait
+```
+
+The error message directs us to line number 27: `printqueue.push("testpage from client.");`
+Temporarily removing this line makes the error disappear. So it is 'caused' at that line. Yet, the additional hint points to something else: `let server = thread::spawn(move || {` This is where the move occurs. As we already realised above: The move is somehow crucial.
+
+
+### Step 6: Concurrent read access
+
+Before thinking about concurrent write access to the (mutable) queue I would like to focus on _any_ form of shared access across threads to the queue. Reading is always easier because no changes can happen while reading data.
+
+----------
+
+[TODO: Link+hint to rusts rules of (im)mutable references borrowing](xxxxxxxxxx)
+
+----------
+
+So the first thing to do is to get read access to the queue from all threads, server and clients.
+
+To do so, we remove the write access to the queue both, in the server and the children.
+```
+if let Some(printjob) = printqueue.pop() {
+    println!("printing: {}", printjob);
+}
+```
+
+```
+printqueue.push("testpage from client.");
+println!("Thread {} pushed a job into the queue.", num);
+```
+
+And add a read access in the clients:
+```
+println!("Thread {} can read the print queue: {:?}", num, printqueue);
+```
+
+The moving still gets in the way:
+```
+src/main.rs:24:71: 24:81 error: capture of moved value: `printqueue` [E0382]
+src/main.rs:24     let server = thread::spawn(move || {
+                                              ^~~~~~~
+<std macros>:2:27: 2:58 note: in this expansion of format_args!
+<std macros>:3:1: 3:54 note: in this expansion of print! (defined in <std macros>)
+src/main.rs:24:13: 24:83 note: in this expansion of println! (defined in <std macros>)
+src/main.rs:24:71: 24:81 help: run `rustc --explain E0382` to see a detailed explanation
+src/main.rs:24:71: 24:81 note: move occurs because `printqueue` has type `std::vec::Vec<&'static str>`, which does not implement the `Copy` trait
+error: aborting due to previous error
+error: Could not compile `multiprint`.
+```
+
+------
+
+TODO: Somewhere there was a section on how to read an error message. It would fit here well.
+
+------
+
+Line 24 is the read access in the clients.
+
+```
+println!("Thread {} can read the print queue: {:?}", num, printqueue);
+```
+
+---------
+
+TODO: We could make an excursion into lifetimes here: Borrow via `&printqueue` and only read the thing but then we get
+```
+closure may outlive the current function, but it borrows `printqueue`, which is owned by the current function [E0373]
+```
+Which directly leads into the somewhat unclear situation of shared stack frames
+
+---------
+
+We could make copies of the queue and then move it (but this does not make sense because we plan to have one queue for all threads to use for to do their printing.
+
+The trick will be: Instead of moving the whole queue we can just move (multiple copies) of references to one (shared) queue. The device intended to do the job is called an `Arc`.
 
 ```
 fn main() {
@@ -455,448 +711,552 @@ fn main() {
     printqueue.push("testpage1");
     printqueue.push("testpage2");
 . . .
-```
 
-Fine, but the compiler now complains (seven times) about
+```
+Fine, but the compiler now complains (seven times!!) about
 ```
 use of moved value: `printqueue`
+```
+in lines 9..15 which is where we add the test pages:
+```
+printqueue.push("testpage1");
+printqueue.push("testpage2");
+printqueue.push("testpage3");
+printqueue.push("testpage4");
+printqueue.push("testpage5");
+printqueue.push("testpage6");
+printqueue.push("testpage7");
+```
+In addition we have the same complaint in lines 18 and 26.
+
+After having created the reference, the original `printqueue` has moved into the `Arc` and is no longer available, i.e. for pushing `testpage1..7` to it.
+
+What we encounter here is the security features of rust which tend to be quite annoying when getting started, before one actually understands what is going on.
+
+
+For the seven test pages we sort things out by making the Arc after adding the test pages.
+
+------------------
+TODO: snapshot/testing 6a for commit d8df61c63bd6ef9a16e1db557b07e7baf30790e5
+
+-----------------
+
+Building this gives us two remaining errors:
+```
+error: capture of moved value: `printqueue`
+```
+in lines 18 and 26.
+
+This is where the threads want to access the queue. This is where the crucial part happens, the **access to the shared ressource from multiple threads**.
+
+So, we have our Arc in place, the queue has been 'moved into it' somehow and I promised that it would allow us to have the same one queue accessible from each thread.
+
+
+
+-----------------
+
+TODO: Detailed description for the cloning part!
+
+TODO: snapshot/testing 6b for commit 38b47609601e0a7566f8952b24547f16fae76928
+
+-----------------
+
 
 ```
-
-After having created the reference, the original `printqueue` is no longer available, i.e. for pushing `testpage1..7` to it.
-
-We address this as follows:
-* Replace the endless loop for an iteration over all elements in `printqueue`
-* Do this without `pop` so that we do not need a mutable reference.
-
-```
-use std::thread;
-use std::sync::Arc;
-use std::time::Duration;
-
-fn main() {
-    let mut threads = Vec::new();
-    let mut printqueue: Vec<&str> = Vec::new();
-
-    printqueue.push("testpage1");
-    printqueue.push("testpage2");
-    printqueue.push("testpage3");
-    printqueue.push("testpage4");
-    printqueue.push("testpage5");
-    printqueue.push("testpage6");
-    printqueue.push("testpage7");
-
-    let printqueue_arc = Arc::new(printqueue);
-    let printqueue_thr = printqueue_arc.clone();
-    threads.push(thread::spawn(move || {
-        for job in printqueue_thr.iter() {
-            // Fiddling around with the timing allowes to see
-            // how the for loop runs in parallel with the other threads started below
-            thread::sleep(Duration::from_millis(1));        
-            println!("print queue: {}", job);
-        }
-    }));
-    for num in 0..7 {
-        let printqueue_thr = printqueue_arc.clone();
-        threads.push(thread::spawn(move || {
-            println!("Hello from thread number {}, I am interested in {}.", num, printqueue_thr[num]);
-        }));
-        println!("Started thread number {:?}.", num);
-    }
-    while let Some(thr) = threads.pop() {
-        let _ = thr.join();
-        println!("Good bye.");
-    }
-}
-```
-
-The output now looks like this:
-
-```
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo build
+   Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.67 secs
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/multiprint`
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
 Started thread number 0.
+Thread 0 can read the print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
 Started thread number 1.
-Hello from thread number 0, I am interested in testpage1.
-print queue: testpage1
-print queue: testpage2
-print queue: testpage3
+Thread 1 can read the print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
 Started thread number 2.
-print queue: testpage4
-print queue: testpage5
-print queue: testpage6
-print queue: testpage7
-Hello from thread number 1, I am interested in testpage2.
-Hello from thread number 2, I am interested in testpage3.
+Thread 2 can read the print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
 Started thread number 3.
-Started thread number 4.
-Hello from thread number 3, I am interested in testpage4.
-Hello from thread number 4, I am interested in testpage5.
-Started thread number 5.
-Hello from thread number 5, I am interested in testpage6.
-Started thread number 6.
-Hello from thread number 6, I am interested in testpage7.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-Good bye.
-```
-
-
-#### Concurrent write access
-
-This is something that, at first sight should not be possible anyway... at least not without careful [locking discipline](http://stackoverflow.com/questions/23350954/why-does-rust-have-mutexes-and-other-sychronization-primitives-if-sharing-of-mu). This is what `Mutex` gives us.
-
-Instead of an `Arc` with the `printqueue` in it directly we are now using an `Arc` with a `Mutex` which in turn 'holds' the `printqueue`.
-
-```
-use std::sync::{Arc, Mutex};
 
 . . .
 
-    let printqueue_shared = Arc::new(Mutex::new(printqueue));
-    let printqueue_thr = printqueue_shared.clone();
+Started thread number 9.
+Vector of 10 join handles.
+Thread 9 can read the print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+Joined thread number 9, Ok(()).
+Joined thread number 8, Ok(()).
+Joined thread number 7, Ok(()).
+Joined thread number 6, Ok(()).
+Joined thread number 5, Ok(()).
+Joined thread number 4, Ok(()).
+Joined thread number 3, Ok(()).
+Joined thread number 2, Ok(()).
+Joined thread number 1, Ok(()).
+Joined thread number 0, Ok(()).
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+print queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+
+. . .
 ```
 
-Please note the renamed variable `printqueue_shared`.
 
-When using the queue we need:
+### Step 7: Concurrent write access
+
+Why all the ado about write access from multiple threads? Imagine the server is in the process of fetching the last job from the queue while _at the very same moment_ a client pushes another job into the queue. How many elements does the queue have *'during'* these two overlaping operations?
+
+For the moment it is enough to know: Such operations on the same data strucutre should just not overlap. Never. They have to happen one after the other.
+
+-------------
+TODO:
+This is something that, at first sight should not be possible anyway... at least not without careful [locking discipline](http://stackoverflow.com/questions/23350954/why-does-rust-have-mutexes-and-other-sychronization-primitives-if-sharing-of-mu).
+
+-------------
+
+This is what `Mutex` gives us. It ensures that there can only be one thread at a time accessing the queue (or any (most) other datastructures we need to share).
+
+The construction that does the job goes as follows:
+* An `Arc` will give all threads a concurrent reference to one `Mutex`
+* The `Mutex`, in turn, _grants_ or _denies_ permission to the queue.
+
+```
+thread 1,
+|  thread 2,
+|  |  ...
+|  |  |
+|  |  | have reference to
+|  |  |
+v  v  v
+
+Arc
+|
+| holds
+|
+v
+
+Mutex
+|
+| holds
+|
+v
+
+queue
+
+```
+
+Instead of an `Arc` with the `printqueue` 'in it' directly we are now using an `Arc` holding a `Mutex` which in turn holds the `printqueue`.
+
+Again, the arc will distribute references to the threads via `clone`.
+
+
+-------------
+TODO: Snapshot for commit 582aa07fde6cd23b88689a071df23a28d42bcd34
+
+-------------
+
+To the rust newcomer (almost) surprisingly, this builds and executes:
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo build
+   Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+    Finished debug [unoptimized + debuginfo] target(s) in 0.72 secs
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo run
+    Finished debug [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/multiprint`
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Started thread number 0.
+Thread 0 can read the print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Started thread number 1.
+Thread 1 can read the print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Started thread number 2.
+
+After replacing the queue with an `arc->queue` and now with an `arc->mutex->queue` datastructure it is a bit surprising that we can still just print 'the queue'.
+Inspecting console output carefulle we can see _some_ differences to the output:
+
+`["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]`
+
+vs.
+
+`Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }`
+
+
+What if we want to print the number of items in the queue? Replacing
+```
+println!("Thread {} can read the print queue: {:?}", num, clientqueue);
+```
+by
+```
+println!("Thread {} can read the print queue: {:?}", num, clientqueue.len());
+```
+hints at the next challenge:
+```
+[~/projets/RustWorkshop/minimals/multiprint]$ cargo build
+   Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+src/main.rs:28:83: 28:86 error: no method named `len` found for type `std::sync::Arc<std::sync::Mutex<std::vec::Vec<&str>>>` in the current scope
+src/main.rs:28             println!("Thread {} can read the print queue: {:?}", num, clientqueue.len());
+                                                                                                 ^~~
+<std macros>:2:27: 2:58 note: in this expansion of format_args!
+<std macros>:3:1: 3:54 note: in this expansion of print! (defined in <std macros>)
+src/main.rs:28:13: 28:90 note: in this expansion of println! (defined in <std macros>)
+```
+What we have done before is a debug output of the whole structure `arc->mutex->queue`. Accessing the length of the queue is something different:
+
+A similar thing will happen, if we just want to access the first element of the queue. We need:
 * `let guard = printqueue_thr.lock().unwrap();`
-* `*guard` instead of `printqueue_thr`
+* `*guard` instead of `clientqueue`/`serverqueue`
 
-```
-threads.push(thread::spawn(move || {
-    let guard = printqueue_thr.lock().unwrap();
-    for job in (*guard).iter() {
-        thread::sleep(Duration::from_millis(1));
-```
-. . . and similarly
-```
-let guard = printqueue_thr.lock().unwrap();
-println!("Hello from thread number {}, I am interested in {}.", num, (*guard)[num]);
-```
+Lets test with read access to the length of the queue, first.
+This is how the client thread has to be modified:
 
+```rust
+for num in 0..10 {
+    let clientqueue = printqueue_mutex_arc.clone();
+    thread::sleep(Duration::from_millis(200)); // we spawn a new threads every 50 msec
+    let handle = thread::spawn(move || {
+        let guard = clientqueue.lock().unwrap();
 
-The overall program after introducing Mutex:
-```
-use std::thread;
-use std::sync::Arc;
-use std::time::Duration;
-
-fn main() {
-    let mut threads = Vec::new();
-    let mut printqueue: Vec<&str> = Vec::new();
-
-    printqueue.push("testpage1");
-    printqueue.push("testpage2");
-    printqueue.push("testpage3");
-    printqueue.push("testpage4");
-    printqueue.push("testpage5");
-    printqueue.push("testpage6");
-    printqueue.push("testpage7");
-
-    let printqueue_arc = Arc::new(printqueue);
-    let printqueue_thr = printqueue_arc.clone();
-    threads.push(thread::spawn(move || {
-        for job in printqueue_thr.iter() {
-            thread::sleep(Duration::from_millis(1));
-            println!("print queue: {}", job);
-        }
-    }));
-    for num in 0..7 {
-        let printqueue_thr = printqueue_arc.clone();
-        threads.push(thread::spawn(move || {
-            println!("Hello from thread number {}, I am interested in {}.", num, printqueue_thr[num]);
-        }));
-        println!("Started thread number {:?}.", num);
-    }
-    while let Some(thr) = threads.pop() {
-        let _ = thr.join();
-        println!("Good bye.");
-    }
+        println!("Thread {} can read the print queue with {:?} elements.", num, (*guard).len());
+        thread::sleep(Duration::from_millis(100));  // each thread first sleeps for 100 msec
+    });
+    threads.push(handle);
+    println!("Started thread number {:?}.", num);
 }
 ```
 
-For testing that we have actually write access to the queue:
-* Introduce the endless loop for printing jobs of some previous example again.
-* Check for successful locking `if let Ok(guard) =`
-* Have the `guard` mutable
-* Change the queue by actuall `pop`ing  print jobs
+
+------
+TODO:
+Snapshot e0436669134f7e33bc7493ce4d06e75c5d3f2776
+
+------
+
+The output clearly shows the locking and unlocking behavior:
+```
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Started thread number 0.
+print queue: Mutex { <locked> }
+Thread 0 can read the print queue: 7
+print queue: Mutex { <locked> }
+print queue: Mutex { <locked> }
+print queue: Mutex { <locked> }
+print queue: Mutex { <locked> }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Started thread number 1.
+Thread 1 can read the print queue: 7
+print queue: Mutex { <locked> }
+print queue: Mutex { <locked> }
+print queue: Mutex { <locked> }
+print queue: Mutex { <locked> }
+print queue: Mutex { <locked> }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+```
+Wheneve a new client thread is started (which happens every 200 msec in this configuration) it locks the queue and accesses the number of elements via `len()`.
+Then the thread waits for 100 msec. The server loop operates at a higher rate, waiting 20 msec in each iteration, only. We can see during the access of a child thread the server loop finds the mutex locked.
+
+
+Let's see how it will behave if the server tries to access (not just debug output) the queue simultaneously with the clients:
+
+-----
+TODO:
+Snapshot for commit bf24373
+
+-----
 
 ```
-loop {
-    if let Ok(mut guard) = printqueue_thr.lock() {
-        if let Some (printjob) = (*guard).pop() {
-            println!("printing: {}", printjob);
-        }
-    }
-    thread::sleep(Duration::from_millis(3));    // Modify this value to achieve timing overlap between threads.
-}
+Compiling multiprint v0.1.0 (file:///home/broe/projets/RustWorkshop/minimals/multiprint)
+ Finished debug [unoptimized + debuginfo] target(s) in 0.77 secs
+  Running `target/debug/multiprint`
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+Started thread number 0.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Thread 0 can read the print queue with 7 elements.
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+Started thread number 1.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Thread 1 can read the print queue with 7 elements.
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+Started thread number 2.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Thread 2 can read the print queue with 7 elements.
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+Server thread can read the print queue with 7 elements.
+Started thread number 3.
+
+. . .
 ```
+From the output alone, the locking phases 'magically' disappeared. Watching the actual behaviour we can observe a delay in the server messages whenever a child thread locks the mutex.
+According to the [standard library documentation](https://doc.rust-lang.org/std/sync/struct.Mutex.html#method.lock), `lock`  
 
-For the other threads, we also check
-* for successful locking (see above)
-* whether the queue has enough elements so that we can retrieve 'our' job `(*guard)[num]`.
+> ... will block the local thread until it is available to acquire the mutex. Upon returning, the thread is the only thread with the mutex held.
+
+This is exactly what we observe.
+
 
 ```
-        if let Ok(guard) = printqueue_thr.lock() {
-            if num < (*guard).len() {
-                println!("Hello from thread number {}, job {} is there.", num, (*guard)[num]);
-            }
-            else {
-                println!("Hello from thread number {}, could not retreive job.", num);
-            } // <<-- lock implicitly released by `guard` going out of scope.
-        };
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
+printing: testpage7
+Started thread number 0.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"] }
+printing: Some Print Job.
+Started thread number 1.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"] }
+printing: Some Print Job.
+Started thread number 2.
+Started thread number 3.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"] }
+printing: Some Print Job.
+Started thread number 4.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"] }
+printing: Some Print Job.
+Started thread number 5.
+Started thread number 6.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "Some Print Job."] }
+printing: Some Print Job.
+Started thread number 7.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "Some Print Job."] }
+printing: Some Print Job.
+Started thread number 8.
+Started thread number 9.
+Vector of 10 join handles.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "Some Print Job.", "Some Print Job."] }
+printing: Some Print Job.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "Some Print Job.", "Some Print Job."] }
+printing: Some Print Job.
+Joined thread number 9, Ok(()).
+Joined thread number 8, Ok(()).
+Joined thread number 7, Ok(()).
+Joined thread number 6, Ok(()).
+Joined thread number 5, Ok(()).
+Joined thread number 4, Ok(()).
+Joined thread number 3, Ok(()).
+Joined thread number 2, Ok(()).
+Joined thread number 1, Ok(()).
+Joined thread number 0, Ok(()).
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "Some Print Job.", "Some Print Job."] }
+printing: Some Print Job.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "Some Print Job."] }
+printing: Some Print Job.
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"] }
+printing: testpage6
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5"] }
+printing: testpage5
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4"] }
+printing: testpage4
+print queue: Mutex { data: ["testpage1", "testpage2", "testpage3"] }
+printing: testpage3
+print queue: Mutex { data: ["testpage1", "testpage2"] }
+printing: testpage2
+print queue: Mutex { data: ["testpage1"] }
+printing: testpage1
+print queue: Mutex { data: [] }
+print queue: Mutex { data: [] }
+print queue: Mutex { data: [] }
+print queue: Mutex { data: [] }
+print queue: Mutex { data: [] }
 ```
-
-The `;` after the `if let` block is easlily overlooked but important!
-
-To conclude, we have a server running in an infinite loop, and printing one job from the queue, if there is any. It is important that the infinit loop locks and (implicitly) releases the queue in every round, when `guard` goes out of scope. Otherwise the 'other threads' had no chance of accessing (locking) the queue.
 
 
 ### Client threads feed jobs to a print server
 
-In order to implement and demonstrate a client-server scheme we modify the 'other threads' so that each of them also
-* runs in an infinite `loop`.
-* from time to time `push` ing a `job` in the `queue` `(*guard).push("Some Print Job.");`.
-
-For monitoring the dynamics between threads we
-* have a look at the queue whenever the server enters the loop: `println! ("The Queue: {:?}", (*guard));`.
-* adapt the sleep duration in the server and client loop so that things don't run too fast to observe.
-* add a counter variable in each client thread `let mut i = 0;` increase it on every new job `i += 1` and print a message for every new job.
+In order to demonstrate a more realistic client-server dynamics behaviour we modify the clients so that each of them
+* runs in an infinite loop just as the server does
+* run at fixed speed by not waiting for the lock to become availale (but taking it only if it is available) `if let Ok(mut guard) = serverqueue.try_lock() { . . . }`
+* from time to time `push`es a `job` in the `queue`.
+* add a counter variable in the server loop `let mut i = 0;`, increase it on every new loop iteration `i += 1` and print a message for every new job.
+* adapt the sleep durations in the server and client loop so that an interesting dynamics occurs
 * delay the print clients differently so that they put their jobs in different intervals.
 
-The overall program:
+First, we adapt the server loop to
+* count the iterations
+
+We also adapt the sleep durations.
+
+------
+TODO:
+Snapshot for commit
+905865723c240300961b6beb677cdbb39c6d3ff5
+------
 
 ```
-use std::thread;
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
-
-fn main() {
-    let mut threads = Vec::new();
-    let mut printqueue: Vec<&str> = Vec::new();
-
-    printqueue.push("testpage1");
-    printqueue.push("testpage2");
-    printqueue.push("testpage3");
-    printqueue.push("testpage4");
-    printqueue.push("testpage5");
-    printqueue.push("testpage6");
-    printqueue.push("testpage7");
-
-    let printqueue_shared = Arc::new(Mutex::new(printqueue));
-    let printqueue_thr = printqueue_shared.clone();
-    threads.push(thread::spawn(move || {
-        loop {
-            if let Ok(mut guard) = printqueue_thr.lock() {
-                println! ("The Queue: {:?}", (*guard));
-                if let Some (printjob) = (*guard).pop() {
-                    println!("printing: {}", printjob);
-                }
-            }
-            thread::sleep(Duration::from_millis(30));
-        }
-    }));
-    for num in 0..7 {
-        let printqueue_thr = printqueue_shared.clone();
-        threads.push(thread::spawn(move || {
-            let mut i = 0;
-            loop {
-                if let Ok(mut guard) = printqueue_thr.lock() {
-                    i += 1;
-                    println!("Hello from thread number {}, I will put job number {}.", num, i);
-                    (*guard).push("Some Print Job.");
-                };
-                thread::sleep(Duration::from_millis(100*(num+1)));
-            }
-        }));
-    }
-    while let Some(thr) = threads.pop() {
-        let _ = thr.join();
-    }
-}
-```
-This is the console output of a typical run:
-```
-Hello from thread number 0, I will put job number 1.
-Hello from thread number 2, I will put job number 1.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+Started thread number 0.
+Started thread number 1.
+Started thread number 2.
+Child 0...
+...putting job
+Child 1...
+...putting job
+[0] print queue: Mutex { <locked> }
+Child 2...
+Started thread number 3.
+Started thread number 4.
+Started thread number 5.
+Child 4...
+...putting job
+Child 3...
+...putting job
+Child 5...
+...putting job
+Started thread number 6.
+Started thread number 7.
+Child 6...
+...putting job
+Started thread number 8.
+Child 7...
+...putting job
+Started thread number 9.
+Vector of 10 join handles.
+Child 9...
+...putting job
+Child 8...
+...putting job
+[1] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-Hello from thread number 3, I will put job number 1.
-Hello from thread number 1, I will put job number 1.
-Hello from thread number 4, I will put job number 1.
-Hello from thread number 6, I will put job number 1.
-Hello from thread number 5, I will put job number 1.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+[2] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+[3] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+[4] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-Hello from thread number 0, I will put job number 2.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+Child 0...
+...putting job
+[5] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+[6] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+[7] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-Hello from thread number 0, I will put job number 3.
-Hello from thread number 1, I will put job number 2.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+[8] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+[9] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job."]
+Child 0...
+...putting job
+Child 1...
+...putting job
+[10] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-Hello from thread number 2, I will put job number 2.
-Hello from thread number 0, I will put job number 4.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."]
+[11] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job."]
+[12] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"]
+[13] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6", "testpage7"] }
 printing: testpage7
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"]
+[14] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "testpage6"] }
 printing: testpage6
-Hello from thread number 0, I will put job number 5.
-Hello from thread number 3, I will put job number 2.
-Hello from thread number 1, I will put job number 3.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job.", "Some Print Job.", "Some Print Job."]
+Child 0...
+...putting job
+Child 2...
+...putting job
+[15] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job.", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job.", "Some Print Job."]
+[16] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job."] }
 printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job."]
-printing: Some Print Job.
-Hello from thread number 0, I will put job number 6.
-Hello from thread number 4, I will put job number 2.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5"]
+[17] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4", "testpage5"] }
 printing: testpage5
-Hello from thread number 2, I will put job number 3.
-Hello from thread number 0, I will put job number 7.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-Hello from thread number 1, I will put job number 4.
-Hello from thread number 5, I will put job number 2.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job."]
-printing: Some Print Job.
-Hello from thread number 0, I will put job number 8.
-Hello from thread number 6, I will put job number 2.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "testpage4"]
+[18] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3", "testpage4"] }
 printing: testpage4
-Hello from thread number 0, I will put job number 9.
-Hello from thread number 3, I will put job number 3.
-Hello from thread number 1, I will put job number 5.
-The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job.", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job."]
-printing: Some Print Job.
-Hello from thread number 2, I will put job number 4.
-Hello from thread number 0, I will put job number 10.
-The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "testpage2", "testpage3"]
+[19] print queue: Mutex { data: ["testpage1", "testpage2", "testpage3"] }
 printing: testpage3
-The Queue: ["testpage1", "testpage2"]
+Child 0...
+...putting job
+Child 1...
+...putting job
+Child 3...
+...putting job
+[20] print queue: Mutex { data: ["testpage1", "testpage2", "Some Print Job.", "Some Print Job.", "Some Print Job."] }
+printing: Some Print Job.
+[21] print queue: Mutex { data: ["testpage1", "testpage2", "Some Print Job.", "Some Print Job."] }
+printing: Some Print Job.
+[22] print queue: Mutex { data: ["testpage1", "testpage2", "Some Print Job."] }
+printing: Some Print Job.
+[23] print queue: Mutex { data: ["testpage1", "testpage2"] }
 printing: testpage2
-Hello from thread number 0, I will put job number 11.
-Hello from thread number 1, I will put job number 6.
-Hello from thread number 4, I will put job number 3.
-The Queue: ["testpage1", "Some Print Job.", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1", "Some Print Job."]
-printing: Some Print Job.
-Hello from thread number 0, I will put job number 12.
-The Queue: ["testpage1", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["testpage1"]
+[24] print queue: Mutex { data: ["testpage1"] }
 printing: testpage1
-The Queue: []
-Hello from thread number 2, I will put job number 5.
-Hello from thread number 0, I will put job number 13.
-Hello from thread number 3, I will put job number 4.
-Hello from thread number 1, I will put job number 7.
-The Queue: ["Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-Hello from thread number 5, I will put job number 3.
-The Queue: ["Some Print Job.", "Some Print Job.", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-The Queue: ["Some Print Job.", "Some Print Job.", "Some Print Job."]
-printing: Some Print Job.
-^C
+Child 0...
+...putting job
+
+. . .
 ```
 
-As we can see, the server takes some time until the print queue is empty. If the loop of the server was 'too slow' the print queue would tend to grow 'infinitely'.
-
-
-### Transfer non-trivial information
-
-
-#### Lifetime, consumption and references
-
-It would be nice if not all print jobs were the same `Some Print Job.`. How to transfer an interesting text to the server to print. It sounds trivial but it isn't:
-
-Our job should look like this: `Printjob number 5 from thread 1`.
-
-First modification lets the clients create an according text and -- for now -- output it by themselves via `println!`:
-
-```
-if let Ok(mut guard) = printqueue_thr.lock() {
-    i += 1;
-    let job = format! ("Printjob number {} from thread {}.", i, num);
-    println!("I will put a job in the queue: {}", job);
-    (*guard).push("Some Print Job.");
-};
-```
-
-Next, we want to push it to the print queue instead of the trivial text `Some Print Job.`:
-
-This `(*guard).push(job);` does not succeed because push wants a reference to a string instead of a string. The reason why it cannot take the string as it is lies in the fact that vectors need things of the same size (which is the case for references but not for strings.
-
-```
-src/main.rs:39:35: 39:38 error: mismatched types [E0308]
-src/main.rs:39                     (*guard).push(job);
-                                                 ^~~
-src/main.rs:39:35: 39:38 help: run `rustc --explain E0308` to see a detailed explanation
-src/main.rs:39:35: 39:38 note: expected type `&str`
-src/main.rs:39:35: 39:38 note:    found type `std::string::String`
-```
-So we give it a reference to the job `(*guard).push(&job);` which, fortunately, is still not making the compiler happy:
-```
-src/main.rs:39:36: 39:39 error: `job` does not live long enough
-src/main.rs:39                     (*guard).push(&job);
-                                                  ^~~
-src/main.rs:39:36: 39:39 note: reference must be valid for the static lifetime...
-src/main.rs:37:86: 40:18 note: ...but borrowed value is only valid for the block suffix following statement 1 at 37:85
-src/main.rs:37                     let job = format! ("Printjob number {} from thread {}.", i, num);
-```
-
-Why could we use the trivial message before but we cannot use the non-trivial one now? The trivial one was already known at compile time so that it _lives long enough_, namely for the whole program execution. We call this _lifetime_ `'static`.
-
-For the non-trivial message, rust cannot be sure and, hence, stops us from carelessly using the reference.  `push`, in turn, is defined so as to _consume_ the reference for good reasons -- it needs the reference to point at something useful, something that _lives as long as the reference_, i.e. presumably longer as the client thread, potentially as long as the print queue.
-
-Finally, we can use `String` instead of `&str` which is not bound to the _lifetime_ or _stackframe_ of the child thread:
-* Define the printqueue as `let printqueue: Vec<String> = Vec::new();`.
-* Push `String` rather than `&str` into the queue:
-    `printqueue.push(String::from("testpage1");`
-* Correspondingly, `job` receives a `String` from format so that `(*guard).push(job);` just works.
+Feel free to experiment with the delays and observe the effect on the queue.
