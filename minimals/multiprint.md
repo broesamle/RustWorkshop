@@ -3,14 +3,15 @@
 Multiprint
 ==========
 
+We develop a model of a print queue used by one server and several clients. The Clients put print jobs into the queue, whereas the server takes them off the queue and prints them.
+
+The queue is modeled as a `vec`, the jobs as `String`, the printing as console output. While this is all not high tech, the scheme developed here demonstrates essentials of multi-threaded systems.
+
 * Multiple threads running concurrently
 * Have the main thread `join` its child threads in order to keep central ressources (here `stdout`) available for the child threads
 * Shared ressources
 * Locking of shared ressources
-* Variable skopes and implicit unlocking via `MutexGuard` and `drop`
-* Compile time / runtime
-* Static Strings vs. dynamically generated strings
-* Lifetime
+* TODO: Variable skopes and implicit unlocking via `MutexGuard` and `drop`
 
 Console output from multiple threads
 ------------------------------------
@@ -1155,6 +1156,7 @@ We also adapt the sleep durations.
 TODO:
 Snapshot for commit
 905865723c240300961b6beb677cdbb39c6d3ff5
+
 ------
 
 ```
@@ -1260,3 +1262,14 @@ Child 0...
 ```
 
 Feel free to experiment with the delays and observe the effect on the queue.
+
+
+### Step 8: Transmit some non-trivial data between clients and server
+
+
+------
+TODO:
+Snapshot for commit
+905865723c240300961b6beb677cdbb39c6d3ff5
+
+------
