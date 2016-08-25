@@ -22,11 +22,11 @@ fn main() {
     });
     for num in 0..10 {
         let clientqueue = printqueue_mutex_arc.clone();
-        thread::sleep(Duration::from_millis(50)); // we spawn a new threads every 50 msec
-
+        thread::sleep(Duration::from_millis(200));
         let handle = thread::spawn(move || {
-            println!("Thread {} can read the print queue: {:?}", num, clientqueue);
-            thread::sleep(Duration::from_millis(100));  // each thread first sleeps for 100 msec
+            let guard = clientqueue.lock().unwrap();
+            println!("Thread {} can read the print queue with {:?} elements.", num, (*guard).len());
+            thread::sleep(Duration::from_millis(100));
         });
         threads.push(handle);
         println!("Started thread number {:?}.", num);
